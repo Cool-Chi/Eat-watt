@@ -1,38 +1,19 @@
-// ================= 全局狀態與資料遷移 (支援資料夾結構) =================
+// ================= 全局狀態與資料遷移 =================
 let currentFilter = 'all'; 
 let foods = [];
 let savedFoods = JSON.parse(localStorage.getItem('dinnerFoods'));
 
-// 產生唯一 ID 的輔助函式
-function generateId() { return 'id-' + Math.random().toString(36).substr(2, 9); }
-
-// 向下相容處理：將舊版扁平陣列，升級為具備 ID 的新結構
 if (savedFoods && savedFoods.length > 0) {
     if (typeof savedFoods[0] === 'string') {
-        foods = savedFoods.map(name => ({ id: generateId(), type: 'item', name: name, budget: '$$' })); 
+        foods = savedFoods.map(name => ({ name: name, budget: '$$' })); 
     } else {
-        // 如果舊版已經是物件，但沒有 id 或 type，幫它補上
-        foods = savedFoods.map(item => ({
-            id: item.id || generateId(),
-            type: item.type || 'item',
-            name: item.name,
-            budget: item.budget || '$$',
-            isOpen: item.isOpen !== undefined ? item.isOpen : true,
-            children: item.children || []
-        }));
+        foods = savedFoods;
     }
 } else {
-    // 預設資料 (展示資料夾功能)
     foods = [
-        { id: generateId(), type: 'item', name: '拉麵', budget: '$$' },
-        { 
-            id: generateId(), type: 'folder', name: '速食控', isOpen: true, 
-            children: [
-                { id: generateId(), type: 'item', name: '麥當勞', budget: '$' },
-                { id: generateId(), type: 'item', name: '鹹酥雞', budget: '$' }
-            ] 
-        },
-        { id: generateId(), type: 'item', name: '火鍋', budget: '$$$' }
+        { name: '拉麵', budget: '$$' }, { name: '火鍋', budget: '$$$' }, 
+        { name: '壽司', budget: '$$$' }, { name: '便當', budget: '$' }, 
+        { name: '義大利麵', budget: '$$' }, { name: '麥當勞', budget: '$' }, { name: '鹹酥雞', budget: '$' }
     ];
 }
 
@@ -44,27 +25,12 @@ function setUIState(disabled) {
     document.getElementById('actionBtn').disabled = disabled;
     document.getElementById('foodInput').disabled = disabled;
     document.getElementById('addBtn').disabled = disabled;
-    document.getElementById('addFolderBtn').disabled = disabled;
-    document.querySelectorAll('.method-tab, .filter-tab, .budget-btn, .delete-icon-btn, .inline-budget-btn').forEach(btn => btn.disabled = disabled);
+    document.querySelectorAll('.method-tab, .filter-tab, .budget-btn, .delete-btn, .inline-budget-btn').forEach(btn => btn.disabled = disabled);
 }
 
-// ================= 資料提取與遊戲引擎適配 =================
-// 遊戲引擎需要一個「攤平」的名單。此函式會遞迴遍歷資料夾，將有效項目抽出。
 function getFilteredFoods() {
-    let pool = [];
-    function extract(items) {
-        items.forEach(item => {
-            if (item.type === 'folder') {
-                extract(item.children); // 進入資料夾遞迴
-            } else {
-                if (currentFilter === 'all' || item.budget === currentFilter) {
-                    pool.push(item);
-                }
-            }
-        });
-    }
-    extract(foods);
-    return pool;
+    if (currentFilter === 'all') return foods;
+    return foods.filter(f => f.budget === currentFilter);
 }
 
 // ================= 互動遊戲核心邏輯 (Methods) =================
@@ -371,7 +337,7 @@ const methods = [
     }
 ];
 
-// ================= UI 資料渲染與 SortableJS 拖曳綁定 =================
+// ================= UI 資料與主題綁定 =================
 
 let selectedNewBudget = '$$';
 document.querySelectorAll('#addBudgetSelector .budget-btn').forEach(btn => {
@@ -382,179 +348,120 @@ document.querySelectorAll('#addBudgetSelector .budget-btn').forEach(btn => {
     };
 });
 
+// 修正 Bug：使用精準的 dataset.filter 進行比對
 function setFilter(budget) {
     if(isAnimating) return;
     currentFilter = budget;
+    
     document.querySelectorAll('#budgetFilterBar .filter-tab').forEach(btn => {
         btn.classList.remove('active');
-        if (btn.dataset.filter === budget) btn.classList.add('active');
+        if (btn.dataset.filter === budget) {
+            btn.classList.add('active');
+        }
     });
+    
     setupCurrentMethod();
 }
 
-// 核心：從 DOM 結構反向重建 JSON 資料 (確保拖曳後的排序被永久儲存)
-function saveStructureFromDOM() {
-    const rootNodes = document.getElementById('foodList').children;
-    const newData = [];
-    
-    Array.from(rootNodes).forEach(node => {
-        if (node.classList.contains('folder-wrapper')) {
-            const childrenNodes = node.querySelector('.folder-content').children;
-            const children = Array.from(childrenNodes).map(child => ({
-                id: child.dataset.id,
-                type: 'item',
-                name: child.dataset.name,
-                budget: child.dataset.budget
-            }));
-            newData.push({
-                id: node.dataset.id,
-                type: 'folder',
-                name: node.dataset.name,
-                isOpen: node.classList.contains('open'),
-                children: children
-            });
-        } else if (node.classList.contains('food-item')) {
-            newData.push({
-                id: node.dataset.id,
-                type: 'item',
-                name: node.dataset.name,
-                budget: node.dataset.budget
-            });
-        }
-    });
-    
-    foods = newData;
-    localStorage.setItem('dinnerFoods', JSON.stringify(foods));
-    setupCurrentMethod(); // 更新遊戲輪盤陣列
-}
-
-// 修改預算 (直接在 DOM 修改後呼叫儲存)
-function changeBudget(btn, newBudget) {
+// 動態修改單個項目的預算並重繪
+function changeBudget(index, newBudget) {
     if (isAnimating) return;
-    const itemEl = btn.closest('.food-item');
-    itemEl.dataset.budget = newBudget;
-    
-    // 更新按鈕視覺
-    const group = btn.parentElement;
-    group.querySelectorAll('.inline-budget-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    
-    saveStructureFromDOM();
+    foods[index].budget = newBudget;
+    renderFoods(); 
 }
 
-// 刪除節點 (支援刪除卡片或整座資料夾)
-function removeNode(btn) {
-    if (isAnimating) return;
-    const itemEl = btn.closest('.food-item') || btn.closest('.folder-wrapper');
-    itemEl.remove(); // 加上 CSS 動畫再 remove 會更好，這裡求穩定直接移除
-    saveStructureFromDOM();
-}
-
-// 資料夾展開/收合
-function toggleFolder(headerEl) {
-    const folderEl = headerEl.parentElement;
-    folderEl.classList.toggle('open');
-    saveStructureFromDOM();
-}
-
-// 產生單一項目 DOM 結構
-function createItemHTML(item) {
-    const s1 = item.budget === '$' ? 'active' : '';
-    const s2 = item.budget === '$$' ? 'active' : '';
-    const s3 = item.budget === '$$$' ? 'active' : '';
-    
-    return `
-        <div class="food-item" data-id="${item.id}" data-type="item" data-name="${item.name}" data-budget="${item.budget}">
-            <span class="item-title">${item.name}</span>
-            <div class="inline-budget-group">
-                <button class="inline-budget-btn ${s1}" onclick="changeBudget(this, '$')">$</button>
-                <button class="inline-budget-btn ${s2}" onclick="changeBudget(this, '$$')">$$</button>
-                <button class="inline-budget-btn ${s3}" onclick="changeBudget(this, '$$$')">$$$</button>
-            </div>
-            <button class="delete-icon-btn" onclick="removeNode(this)">✕</button>
-        </div>
-    `;
-}
-
-// 渲染畫面並綁定拖曳
+// 渲染左側食物清單：加入即時修改小按鈕
 function renderFoods() {
     const list = document.getElementById('foodList');
     list.innerHTML = '';
-    
-    foods.forEach(node => {
-        if (node.type === 'folder') {
-            const folderHtml = `
-                <div class="folder-wrapper ${node.isOpen ? 'open' : ''}" data-id="${node.id}" data-type="folder" data-name="${node.name}">
-                    <div class="folder-header" onclick="toggleFolder(this)">
-                        <span class="folder-icon">▶</span>
-                        <span class="item-title">${node.name}</span>
-                        <button class="delete-icon-btn" onclick="event.stopPropagation(); removeNode(this)">✕</button>
-                    </div>
-                    <div class="folder-content-wrapper">
-                        <div class="folder-content">
-                            ${node.children.map(child => createItemHTML(child)).join('')}
-                        </div>
-                    </div>
-                </div>
-            `;
-            list.insertAdjacentHTML('beforeend', folderHtml);
-        } else {
-            list.insertAdjacentHTML('beforeend', createItemHTML(node));
-        }
+    foods.forEach((food, index) => {
+        const li = document.createElement('li');
+        li.className = 'food-item';
+        
+        // 判斷按鈕的激活狀態
+        const s1 = food.budget === '$' ? 'active' : '';
+        const s2 = food.budget === '$$' ? 'active' : '';
+        const s3 = food.budget === '$$$' ? 'active' : '';
+
+        li.innerHTML = `
+            <span class="food-name">${food.name}</span>
+            <div class="inline-budget-group">
+                <button class="inline-budget-btn ${s1}" onclick="changeBudget(${index}, '$')">$</button>
+                <button class="inline-budget-btn ${s2}" onclick="changeBudget(${index}, '$$')">$$</button>
+                <button class="inline-budget-btn ${s3}" onclick="changeBudget(${index}, '$$$')">$$$</button>
+            </div>
+            <button class="delete-btn" onclick="removeFood(${index})">刪除</button>
+        `;
+        list.appendChild(li);
     });
-
-    initSortable(); // 重新綁定拖曳引擎
-}
-
-// 啟動 SortableJS 引擎
-function initSortable() {
-    const commonOptions = {
-        group: 'shared', // 允許在根目錄與資料夾之間互相拖曳
-        animation: 300,  // FLIP 絲滑排序動畫
-        fallbackOnBody: true, // 手機端防滑動衝突
-        ghostClass: 'sortable-ghost',
-        dragClass: 'sortable-drag',
-        onEnd: saveStructureFromDOM // 拖曳放開後立即儲存新結構
-    };
-
-    // 1. 綁定根目錄
-    new Sortable(document.getElementById('foodList'), {
-        ...commonOptions,
-        // 防止把資料夾拖進另一個資料夾中 (保持一層結構)
-        onMove: function (evt) {
-            if (evt.dragged.dataset.type === 'folder' && evt.to.classList.contains('folder-content')) {
-                return false; 
-            }
-        }
-    });
-
-    // 2. 綁定所有資料夾內部
-    document.querySelectorAll('.folder-content').forEach(container => {
-        new Sortable(container, commonOptions);
-    });
+    localStorage.setItem('dinnerFoods', JSON.stringify(foods));
+    setupCurrentMethod(); // 自動刷新目前的遊戲過濾器狀態
 }
 
 function addFood() {
     const input = document.getElementById('foodInput');
     const val = input.value.trim();
     if (val) {
-        foods.push({ id: generateId(), type: 'item', name: val, budget: selectedNewBudget });
+        foods.push({ name: val, budget: selectedNewBudget });
         input.value = '';
         renderFoods();
     }
 }
 
-function addFolder() {
-    const input = document.getElementById('foodInput');
-    const val = input.value.trim() || '新資料夾'; // 未輸入則預設名稱
-    foods.push({ id: generateId(), type: 'folder', name: val, isOpen: true, children: [] });
-    input.value = '';
+function removeFood(index) {
+    if (isAnimating) return;
+    foods.splice(index, 1);
     renderFoods();
 }
 
 document.getElementById('foodInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') addFood();
 });
+
+// 遊戲方法切換
+function renderMethods() {
+    const bar = document.getElementById('methodsBar');
+    bar.innerHTML = '';
+    methods.forEach((m, index) => {
+        const btn = document.createElement('button');
+        btn.className = `method-tab ${index === currentMethodIndex ? 'active' : ''}`;
+        btn.innerText = m.name;
+        btn.onclick = () => { if(!isAnimating) switchMethod(index); };
+        bar.appendChild(btn);
+    });
+    setupCurrentMethod();
+}
+
+function switchMethod(index) {
+    currentMethodIndex = index;
+    renderMethods();
+}
+
+function setupCurrentMethod() {
+    const method = methods[currentMethodIndex];
+    const zone = document.getElementById('interactiveZone');
+    const actionBtn = document.getElementById('actionBtn');
+    
+    const pool = getFilteredFoods();
+
+    if (pool.length === 0) {
+        zone.innerHTML = `<div class="empty-state">目前此預算內沒有食物，請先新增！</div>`;
+        actionBtn.innerText = '名單為空';
+        actionBtn.disabled = true;
+        actionBtn.onclick = null;
+        return;
+    }
+
+    actionBtn.disabled = false;
+    method.setupUI(zone, pool);
+    actionBtn.innerText = `開始 ${method.name.split(' ')[1]}`;
+    actionBtn.onclick = () => { 
+        if (!isAnimating) {
+            setUIState(true);
+            method.execute(zone, pool); 
+        }
+    };
+}
 
 // ================= 深淺色模式與動態狀態欄 (PWA 優化) =================
 const themeCheckbox = document.getElementById('themeCheckbox');
