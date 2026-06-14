@@ -1,0 +1,21 @@
+{
+  "name": "Eat-watt 晚餐吃什麼",
+  "short_name": "呷啥",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#F5F5F7",
+  "theme_color": "#F5F5F7",
+  "description": "幫你決定晚餐吃什麼的隨機工具",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
