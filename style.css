@@ -1,66 +1,53 @@
 :root {
-    --bg-color: #F5F5F7; --card-bg: rgba(255, 255, 255, 0.8); --card-border: rgba(255, 255, 255, 0.6);
-    --text-main: #1D1D1F; --text-secondary: #86868B; --apple-blue: #0071E3; --apple-blue-hover: #0077ED;
-    --danger: #FF3B30; --input-border: #D2D2D7; --input-bg: #FFFFFF;
-    --method-bar-bg: #E3E3E8; --method-tab-active: #FFFFFF;
-    --shadow-color: rgba(0, 0, 0, 0.06); --item-border: #E5E5EA; --card-face: #FFFFFF; --card-back-pattern: #0071E3;
+    /* 採用正宗 iOS 淺色/深色 系統背景色票 */
+    --bg-color: #F2F2F7; 
+    --card-bg: rgba(255, 255, 255, 0.7); 
+    --text-main: #1C1C1E; 
+    --text-secondary: #8E8E93; 
+    --apple-blue: #007AFF; 
+    --apple-blue-hover: #0056b3;
+    --danger: #FF3B30; 
+    --input-border: transparent; 
+    --input-bg: rgba(0, 0, 0, 0.05);
+    --method-bar-bg: rgba(0, 0, 0, 0.06); 
+    --method-tab-active: #FFFFFF;
+    --shadow-color: rgba(0, 0, 0, 0.04); 
+    --item-border: transparent; 
+    --card-face: #FFFFFF; 
+    --card-back-pattern: #007AFF;
 }
 
-/* 修改：將 body.dark-mode 改為 html.dark-mode */
 html.dark-mode {
-    --bg-color: #1C1C1E; --card-bg: rgba(44, 44, 46, 0.7); --card-border: rgba(255, 255, 255, 0.1);
-    --text-main: #F5F5F7; --text-secondary: #AEAEB2; --apple-blue: #0A84FF; --apple-blue-hover: #0071E3;
-    --danger: #FF453A; --input-border: #3A3A3C; --input-bg: #2C2C2E;
-    --method-bar-bg: #3A3A3C; --method-tab-active: #48484A;
-    --shadow-color: rgba(0, 0, 0, 0.25); --item-border: #3A3A3C; --card-face: #2C2C2E; --card-back-pattern: #0A84FF;
+    --bg-color: #1C1C1E; 
+    --card-bg: rgba(44, 44, 46, 0.75); 
+    --text-main: #F2F2F7; 
+    --text-secondary: #AEAEB2; 
+    --apple-blue: #0A84FF; 
+    --apple-blue-hover: #007AFF;
+    --danger: #FF453A; 
+    --input-border: transparent; 
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --method-bar-bg: rgba(255, 255, 255, 0.1); 
+    --method-tab-active: rgba(255, 255, 255, 0.15);
+    --shadow-color: rgba(0, 0, 0, 0.2); 
+    --item-border: transparent; 
+    --card-face: #2C2C2E; 
+    --card-back-pattern: #0A84FF;
 }
 
-/* ================= PWA 原生感優化 (防藍框與防選取) ================= */
-* {
-    -webkit-tap-highlight-color: transparent;
-}
-
-/* 修改：擴展背景色到 html 層級，並加入 overscroll-behavior-y: none 防露底色 */
-html, body {
-    background-color: var(--bg-color);
-    overscroll-behavior-y: none;
-}
-
-/* 基礎排版 */
+/* ================= PWA 原生感優化 ================= */
+* { -webkit-tap-highlight-color: transparent; }
+html, body { background-color: var(--bg-color); overscroll-behavior-y: none; }
 body { 
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro TC", sans-serif; 
-    color: var(--text-main); 
-    margin: 0; 
-    padding: 20px; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    min-height: 100vh; 
-    -webkit-font-smoothing: antialiased; 
-    transition: background-color 0.4s, color 0.4s; 
-    overflow-x: hidden; 
-    
-    /* 防選取 */
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
+    color: var(--text-main); margin: 0; padding: 20px; 
+    display: flex; flex-direction: column; align-items: center; min-height: 100vh; 
+    -webkit-font-smoothing: antialiased; transition: background-color 0.4s, color 0.4s; overflow-x: hidden; 
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
 }
+input[type="text"] { -webkit-user-select: auto; user-select: auto; }
 
-input[type="text"] {
-    -webkit-user-select: auto;
-    user-select: auto;
-}
-
-body.dark-mode {
-    --bg-color: #1C1C1E; --card-bg: rgba(44, 44, 46, 0.7); --card-border: rgba(255, 255, 255, 0.1);
-    --text-main: #F5F5F7; --text-secondary: #AEAEB2; --apple-blue: #0A84FF; --apple-blue-hover: #0071E3;
-    --danger: #FF453A; --input-border: #3A3A3C; --input-bg: #2C2C2E;
-    --method-bar-bg: #3A3A3C; --method-tab-active: #48484A;
-    --shadow-color: rgba(0, 0, 0, 0.25); --item-border: #3A3A3C; --card-face: #2C2C2E; --card-back-pattern: #0A84FF;
-}
-
-/* 基礎排版與開關 */
-body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro TC", sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background-color 0.4s, color 0.4s; overflow-x: hidden; }
+/* ... (保留原本的 header 與主題開關 CSS 不變，這裡省略以節省版面，請自己保留你原本的 theme-switch) ... */
 .header { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .page-title { font-size: 28px; font-weight: 700; margin: 0; }
 .theme-switch-wrapper { display: flex; flex-direction: column; align-items: center; }
@@ -86,17 +73,63 @@ input:checked + .slider .clouds { transform: translateY(30px); opacity: 0; }
 input:checked + .slider .stars-and-hills { opacity: 1; transform: translateY(0); }
 .theme-text { margin-top: 8px; font-size: 15px; font-weight: 500; }
 
-/* 容器與卡片 */
+/* 容器與 iOS 大圓角毛玻璃卡片 */
 .container { display: flex; gap: 24px; max-width: 950px; width: 100%; align-items: flex-start; }
-.card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; padding: 30px; box-shadow: 0 8px 32px var(--shadow-color); border: 1px solid var(--card-border); transition: all 0.4s; }
+.card { 
+    background: var(--card-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); 
+    border-radius: 24px; padding: 30px; box-shadow: 0 8px 32px var(--shadow-color); 
+    border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s; 
+}
 .sidebar { flex: 1; display: flex; flex-direction: column; min-width: 320px; }
 .main-panel { flex: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
 
-/* UI 元件與輸入區 */
+/* 輸入與按鈕區 */
 h2 { font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px; color: var(--text-main); }
-.input-section { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-input[type="text"] { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-main); font-size: 16px; outline: none; box-sizing: border-box; transition: all 0.3s ease; }
-input[type="text"]:focus { border-color: var(--apple-blue); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
+.input-section { display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px; }
+input[type="text"] { width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-main); font-size: 16px; outline: none; box-sizing: border-box; transition: all 0.3s ease; }
+input[type="text"]:focus { background: var(--card-bg); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3); }
+.input-actions { display: flex; gap: 8px; width: 100%; }
+.add-btn { flex: 4; background: var(--apple-blue); color: white; border: none; border-radius: 14px; padding: 12px 0; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;}
+.folder-btn { flex: 1; background: var(--input-bg); color: var(--text-main); border: none; border-radius: 14px; font-size: 20px; cursor: pointer; transition: all 0.3s ease;}
+
+/* ================= 排序與階層列表 UI ================= */
+.food-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; max-height: 50vh; padding-bottom: 20px; }
+.food-list::-webkit-scrollbar { width: 0; } /* 隱藏滾動條更貼近原生 iOS */
+
+/* 獨立卡片設計 (無生硬邊框，純陰影與圓角) */
+.food-item { 
+    background: var(--card-face); border-radius: 16px; padding: 12px 16px; margin-bottom: 10px; 
+    box-shadow: 0 2px 10px var(--shadow-color); border: 1px solid rgba(255,255,255,0.05); 
+    display: flex; align-items: center; justify-content: space-between; 
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s; cursor: grab;
+}
+.food-item-left { display: flex; align-items: center; gap: 10px; flex: 1; overflow: hidden; }
+.food-item-right { display: flex; align-items: center; gap: 8px; }
+.food-name { font-weight: 500; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 資料夾設計 */
+.folder-item { 
+    background: var(--input-bg); border-radius: 20px; margin-bottom: 12px; 
+    border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 4px 12px var(--shadow-color); 
+}
+.folder-header { 
+    padding: 16px; display: flex; justify-content: space-between; align-items: center; 
+    font-weight: 600; cursor: pointer; border-radius: 20px;
+}
+.folder-title { display: flex; align-items: center; gap: 8px; flex: 1; }
+.folder-arrow { transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); font-size: 12px; color: var(--text-secondary); }
+.folder-item.open .folder-arrow { transform: rotate(180deg); }
+
+/* 資料夾展開動畫 (CSS Grid Hack) */
+.folder-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+.folder-item.open .folder-content { grid-template-rows: 1fr; }
+.folder-content-inner { overflow: hidden; }
+.folder-content-list { min-height: 10px; padding: 0 12px 12px 12px; list-style: none; margin: 0; }
+
+/* 拖曳動畫與視覺回饋 (SortableJS Class) */
+.sortable-chosen { transform: scale(0.96); box-shadow: 0 10px 25px rgba(0,0,0,0.15); z-index: 100;}
+.sortable-drag { opacity: 0.9 !important; cursor: grabbing !important; }
+.sortable-ghost { opacity: 0.3 !important; border: 2px dashed var(--apple-blue) !important; background: transparent !important; }
 
 /* == 全域按鈕過渡與點擊反饋 == */
 button { transition: all 0.3s ease; }
