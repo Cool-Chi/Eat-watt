@@ -1,0 +1,53 @@
+const CACHE_NAME = 'eat-watt-cache-v1';
+
+// 這裡列出你希望離線時也能讀取的所有檔案
+const urlsToCache = [
+  './',
+  './index.html',
+  './style.css',
+  './script.js',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
+];
+
+// 安裝 Service Worker 時，將檔案加入快取
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Opened cache');
+        return cache.addAll(urlsToCache);
+      })
+  );
+});
+
+// 攔截網頁請求：如果快取裡有，就從快取拿（離線可用）；沒有才連網去抓
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // 快取命中，直接回傳
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      })
+  );
+});
+
+// 啟動時清除舊的快取 (如果未來你更新了 CACHE_NAME，這會把舊的清掉)
+self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
