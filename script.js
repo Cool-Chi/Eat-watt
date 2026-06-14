@@ -1,19 +1,38 @@
-// ================= 全局狀態與資料遷移 =================
+// ================= 全局狀態與資料遷移 (支援資料夾結構) =================
 let currentFilter = 'all'; 
 let foods = [];
 let savedFoods = JSON.parse(localStorage.getItem('dinnerFoods'));
 
+// 產生唯一 ID 的輔助函式
+function generateId() { return 'id-' + Math.random().toString(36).substr(2, 9); }
+
+// 向下相容處理：將舊版扁平陣列，升級為具備 ID 的新結構
 if (savedFoods && savedFoods.length > 0) {
     if (typeof savedFoods[0] === 'string') {
-        foods = savedFoods.map(name => ({ name: name, budget: '$$' })); 
+        foods = savedFoods.map(name => ({ id: generateId(), type: 'item', name: name, budget: '$$' })); 
     } else {
-        foods = savedFoods;
+        // 如果舊版已經是物件，但沒有 id 或 type，幫它補上
+        foods = savedFoods.map(item => ({
+            id: item.id || generateId(),
+            type: item.type || 'item',
+            name: item.name,
+            budget: item.budget || '$$',
+            isOpen: item.isOpen !== undefined ? item.isOpen : true,
+            children: item.children || []
+        }));
     }
 } else {
+    // 預設資料 (展示資料夾功能)
     foods = [
-        { name: '拉麵', budget: '$$' }, { name: '火鍋', budget: '$$$' }, 
-        { name: '壽司', budget: '$$$' }, { name: '便當', budget: '$' }, 
-        { name: '義大利麵', budget: '$$' }, { name: '麥當勞', budget: '$' }, { name: '鹹酥雞', budget: '$' }
+        { id: generateId(), type: 'item', name: '拉麵', budget: '$$' },
+        { 
+            id: generateId(), type: 'folder', name: '速食控', isOpen: true, 
+            children: [
+                { id: generateId(), type: 'item', name: '麥當勞', budget: '$' },
+                { id: generateId(), type: 'item', name: '鹹酥雞', budget: '$' }
+            ] 
+        },
+        { id: generateId(), type: 'item', name: '火鍋', budget: '$$$' }
     ];
 }
 
@@ -25,12 +44,27 @@ function setUIState(disabled) {
     document.getElementById('actionBtn').disabled = disabled;
     document.getElementById('foodInput').disabled = disabled;
     document.getElementById('addBtn').disabled = disabled;
-    document.querySelectorAll('.method-tab, .filter-tab, .budget-btn, .delete-btn, .inline-budget-btn').forEach(btn => btn.disabled = disabled);
+    document.getElementById('addFolderBtn').disabled = disabled;
+    document.querySelectorAll('.method-tab, .filter-tab, .budget-btn, .delete-icon-btn, .inline-budget-btn').forEach(btn => btn.disabled = disabled);
 }
 
+// ================= 資料提取與遊戲引擎適配 =================
+// 遊戲引擎需要一個「攤平」的名單。此函式會遞迴遍歷資料夾，將有效項目抽出。
 function getFilteredFoods() {
-    if (currentFilter === 'all') return foods;
-    return foods.filter(f => f.budget === currentFilter);
+    let pool = [];
+    function extract(items) {
+        items.forEach(item => {
+            if (item.type === 'folder') {
+                extract(item.children); // 進入資料夾遞迴
+            } else {
+                if (currentFilter === 'all' || item.budget === currentFilter) {
+                    pool.push(item);
+                }
+            }
+        });
+    }
+    extract(foods);
+    return pool;
 }
 
 // ================= 互動遊戲核心邏輯 (Methods) =================
