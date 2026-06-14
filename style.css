@@ -1,66 +1,47 @@
 :root {
-    --bg-color: #F5F5F7; --card-bg: rgba(255, 255, 255, 0.8); --card-border: rgba(255, 255, 255, 0.6);
-    --text-main: #1D1D1F; --text-secondary: #86868B; --apple-blue: #0071E3; --apple-blue-hover: #0077ED;
-    --danger: #FF3B30; --input-border: #D2D2D7; --input-bg: #FFFFFF;
-    --method-bar-bg: #E3E3E8; --method-tab-active: #FFFFFF;
-    --shadow-color: rgba(0, 0, 0, 0.06); --item-border: #E5E5EA; --card-face: #FFFFFF; --card-back-pattern: #0071E3;
+    /* 調整為更貼近 Apple iOS 的配色 */
+    --bg-color: #F2F2F7; 
+    --card-bg: rgba(255, 255, 255, 0.75); 
+    --item-bg: rgba(255, 255, 255, 0.9);
+    --card-border: rgba(255, 255, 255, 0.4);
+    --text-main: #1C1C1E; 
+    --text-secondary: #8E8E93; 
+    --apple-blue: #007AFF; 
+    --apple-blue-hover: #0056b3;
+    --danger: #FF3B30; 
+    --input-border: transparent; 
+    --input-bg: rgba(118, 118, 128, 0.12);
+    --method-bar-bg: rgba(118, 118, 128, 0.12); 
+    --method-tab-active: #FFFFFF;
+    --shadow-color: rgba(0, 0, 0, 0.05); 
+    --item-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-/* 修改：將 body.dark-mode 改為 html.dark-mode */
 html.dark-mode {
-    --bg-color: #1C1C1E; --card-bg: rgba(44, 44, 46, 0.7); --card-border: rgba(255, 255, 255, 0.1);
-    --text-main: #F5F5F7; --text-secondary: #AEAEB2; --apple-blue: #0A84FF; --apple-blue-hover: #0071E3;
-    --danger: #FF453A; --input-border: #3A3A3C; --input-bg: #2C2C2E;
-    --method-bar-bg: #3A3A3C; --method-tab-active: #48484A;
-    --shadow-color: rgba(0, 0, 0, 0.25); --item-border: #3A3A3C; --card-face: #2C2C2E; --card-back-pattern: #0A84FF;
+    --bg-color: #000000; /* iOS 深色模式底色通常為純黑或極深灰 */
+    --card-bg: rgba(28, 28, 30, 0.75); 
+    --item-bg: rgba(44, 44, 46, 0.9);
+    --card-border: rgba(255, 255, 255, 0.05);
+    --text-main: #F2F2F7; 
+    --text-secondary: #EBEBF5; 
+    --apple-blue: #0A84FF; 
+    --apple-blue-hover: #0066cc;
+    --danger: #FF453A; 
+    --input-border: transparent; 
+    --input-bg: rgba(118, 118, 128, 0.24);
+    --method-bar-bg: rgba(118, 118, 128, 0.24); 
+    --method-tab-active: #636366;
+    --shadow-color: rgba(0, 0, 0, 0.3); 
+    --item-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* ================= PWA 原生感優化 (防藍框與防選取) ================= */
-* {
-    -webkit-tap-highlight-color: transparent;
-}
+/* 基礎設定防藍框與防滑動溢出 */
+* { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+html, body { background-color: var(--bg-color); overscroll-behavior-y: none; }
+body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro TC", sans-serif; color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background-color 0.4s, color 0.4s; overflow-x: hidden; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+input[type="text"] { -webkit-user-select: auto; user-select: auto; }
 
-/* 修改：擴展背景色到 html 層級，並加入 overscroll-behavior-y: none 防露底色 */
-html, body {
-    background-color: var(--bg-color);
-    overscroll-behavior-y: none;
-}
-
-/* 基礎排版 */
-body { 
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro TC", sans-serif; 
-    color: var(--text-main); 
-    margin: 0; 
-    padding: 20px; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    min-height: 100vh; 
-    -webkit-font-smoothing: antialiased; 
-    transition: background-color 0.4s, color 0.4s; 
-    overflow-x: hidden; 
-    
-    /* 防選取 */
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-}
-
-input[type="text"] {
-    -webkit-user-select: auto;
-    user-select: auto;
-}
-
-body.dark-mode {
-    --bg-color: #1C1C1E; --card-bg: rgba(44, 44, 46, 0.7); --card-border: rgba(255, 255, 255, 0.1);
-    --text-main: #F5F5F7; --text-secondary: #AEAEB2; --apple-blue: #0A84FF; --apple-blue-hover: #0071E3;
-    --danger: #FF453A; --input-border: #3A3A3C; --input-bg: #2C2C2E;
-    --method-bar-bg: #3A3A3C; --method-tab-active: #48484A;
-    --shadow-color: rgba(0, 0, 0, 0.25); --item-border: #3A3A3C; --card-face: #2C2C2E; --card-back-pattern: #0A84FF;
-}
-
-/* 基礎排版與開關 */
-body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro TC", sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background-color 0.4s, color 0.4s; overflow-x: hidden; }
+/* 頂部開關 (維持不變，省略以節省版面，保留你原有的 .header 與 .theme-switch 系列設定) */
 .header { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .page-title { font-size: 28px; font-weight: 700; margin: 0; }
 .theme-switch-wrapper { display: flex; flex-direction: column; align-items: center; }
@@ -86,40 +67,103 @@ input:checked + .slider .clouds { transform: translateY(30px); opacity: 0; }
 input:checked + .slider .stars-and-hills { opacity: 1; transform: translateY(0); }
 .theme-text { margin-top: 8px; font-size: 15px; font-weight: 500; }
 
-/* 容器與卡片 */
+/* 容器與 iOS 毛玻璃卡片 */
 .container { display: flex; gap: 24px; max-width: 950px; width: 100%; align-items: flex-start; }
-.card { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; padding: 30px; box-shadow: 0 8px 32px var(--shadow-color); border: 1px solid var(--card-border); transition: all 0.4s; }
-.sidebar { flex: 1; display: flex; flex-direction: column; min-width: 320px; }
+.card { background: var(--card-bg); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-radius: 24px; padding: 24px; box-shadow: 0 10px 40px var(--shadow-color); border: 1px solid var(--card-border); transition: all 0.4s; }
+.sidebar { flex: 1; display: flex; flex-direction: column; min-width: 340px; }
 .main-panel { flex: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
 
-/* UI 元件與輸入區 */
-h2 { font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px; color: var(--text-main); }
+h2 { font-size: 22px; font-weight: 700; margin-top: 0; margin-bottom: 20px; color: var(--text-main); letter-spacing: -0.5px; }
+
+/* 按鈕與輸入區 */
 .input-section { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-input[type="text"] { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-main); font-size: 16px; outline: none; box-sizing: border-box; transition: all 0.3s ease; }
-input[type="text"]:focus { border-color: var(--apple-blue); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
+input[type="text"] { width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-main); font-size: 16px; outline: none; transition: all 0.3s ease; }
+input[type="text"]::placeholder { color: var(--text-secondary); }
+input[type="text"]:focus { background: var(--item-bg); box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.2); }
 
-/* == 全域按鈕過渡與點擊反饋 == */
-button { transition: all 0.3s ease; }
-button:active:not(:disabled) { transform: scale(0.96); box-shadow: inset 0 3px 6px rgba(0,0,0,0.15); }
+.budget-selector { display: flex; background: var(--method-bar-bg); padding: 4px; border-radius: 12px; width: 100%; }
+.budget-btn { flex: 1; background: transparent; color: var(--text-secondary); border: none; padding: 8px 0; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.budget-btn.active { background: var(--method-tab-active); color: var(--text-main); box-shadow: 0 2px 6px var(--shadow-color); }
 
-.budget-selector { display: flex; background: var(--method-bar-bg); padding: 4px; border-radius: 10px; width: 100%; box-sizing: border-box;}
-.budget-btn { flex: 1; background: transparent; color: var(--text-secondary); border: none; padding: 8px 0; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
-.budget-btn.active { background: var(--method-tab-active); color: var(--apple-blue); box-shadow: 0 2px 6px var(--shadow-color); }
-.add-btn { width: 100%; background: var(--apple-blue); color: white; border: none; border-radius: 12px; padding: 12px 0; font-size: 16px; font-weight: 600; cursor: pointer; }
+.action-buttons { display: flex; gap: 10px; }
+.add-btn, .add-folder-btn { flex: 1; border: none; border-radius: 14px; padding: 12px 0; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+.add-btn { background: var(--apple-blue); color: white; }
 .add-btn:hover:not(:disabled) { background: var(--apple-blue-hover); }
+.add-folder-btn { background: var(--method-bar-bg); color: var(--apple-blue); }
+.add-folder-btn:active { transform: scale(0.96); background: rgba(0, 122, 255, 0.1); }
 
-/* == 即時預算按鈕清單 UI == */
-.food-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; max-height: 400px; }
-.food-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--item-border); font-size: 16px; transition: border-color 0.4s; }
-.food-name { flex: 1; font-weight: 500; }
+/* ================= 拖曳與資料夾核心 UI ================= */
 
-.inline-budget-group { display: flex; background: var(--method-bar-bg); padding: 3px; border-radius: 8px; margin-right: 12px; gap: 2px;}
-.inline-budget-btn { background: transparent; color: var(--text-secondary); border: none; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;}
-.inline-budget-btn.active { background: var(--apple-blue); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.inline-budget-btn:hover:not(.active) { background: rgba(0,0,0,0.05); }
+.food-list-container { display: flex; flex-direction: column; gap: 10px; min-height: 50px; }
 
-.delete-btn { background: transparent; color: var(--danger); padding: 6px 10px; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
-.delete-btn:hover { background: rgba(255, 59, 48, 0.1); }
+/* 獨立卡片設計 (無邊界質感) */
+.food-item { 
+    display: flex; align-items: center; padding: 14px 16px; 
+    background: var(--item-bg); border-radius: 16px; 
+    box-shadow: var(--item-shadow); 
+    font-size: 16px; font-weight: 500; cursor: grab;
+    transition: box-shadow 0.3s, transform 0.2s;
+    border: 1px solid var(--card-border);
+}
+.food-item:active { cursor: grabbing; }
+
+/* 資料夾設計 */
+.folder-wrapper {
+    background: var(--method-bar-bg);
+    border-radius: 20px;
+    overflow: hidden; /* 切除展開內容邊緣 */
+    transition: background 0.3s;
+    border: 1px solid var(--card-border);
+}
+.folder-header {
+    display: flex; align-items: center; padding: 14px 16px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    user-select: none;
+}
+.folder-icon { margin-right: 8px; transition: transform 0.3s; }
+.folder-wrapper.open .folder-icon { transform: rotate(90deg); }
+
+/* iOS 絲滑 Accordion 展開動畫 */
+.folder-content-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.folder-wrapper.open .folder-content-wrapper {
+    grid-template-rows: 1fr;
+}
+.folder-content {
+    overflow: hidden;
+    min-height: 10px; /* 讓空資料夾也能作為放置區 */
+    padding: 0 10px;
+}
+.folder-wrapper.open .folder-content {
+    padding-bottom: 10px;
+}
+
+/* 共用內部排版 */
+.item-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.inline-budget-group { display: flex; background: rgba(118, 118, 128, 0.1); padding: 3px; border-radius: 10px; margin-right: 12px; gap: 2px;}
+.inline-budget-btn { background: transparent; color: var(--text-secondary); border: none; padding: 4px 8px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.2s;}
+.inline-budget-btn.active { background: var(--item-bg); color: var(--text-main); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+.delete-icon-btn { background: rgba(255, 59, 48, 0.1); color: var(--danger); border: none; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; cursor: pointer; transition: transform 0.2s; }
+.delete-icon-btn:active { transform: scale(0.8); }
+
+/* --- 觸覺回饋視覺化 (拖曳動畫) --- */
+.sortable-ghost {
+    opacity: 0.4;
+    background: var(--method-bar-bg);
+}
+.sortable-drag {
+    opacity: 0.95 !important;
+    /* 抓起時稍微縮小並增加陰影，營造Ｚ軸立體感 */
+    transform: scale(0.96) translateY(-4px) !important;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important;
+    cursor: grabbing !important;
+    z-index: 100;
+}
 
 /* == 過濾器與遊戲選單 == */
 .methods-bar { display: flex; background: var(--method-bar-bg); padding: 4px; border-radius: 14px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center;}
