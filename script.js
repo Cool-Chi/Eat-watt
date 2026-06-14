@@ -1,11 +1,12 @@
 // ================= 全局狀態與樹狀資料結構遷移 =================
 let currentFilter = 'all'; 
-let listData = []; // 改為儲存巢狀結構的 Array
+let listData = []; // 儲存巢狀結構的 Array
 let currentMethodIndex = 0;
 let isAnimating = false;
 let sortableInstances = []; // 儲存所有的 Sortable 實例
+let selectedNewBudget = '$$';
 
-// 資料向下相容處理：將舊版平面陣列升級為具備 ID 的樹狀結構
+// 資料向下相容處理：將舊版陣列升級為具備 ID 的樹狀結構
 const savedTree = localStorage.getItem('dinnerFoodsTree');
 if (savedTree) {
     listData = JSON.parse(savedTree);
@@ -83,7 +84,7 @@ function initSortable() {
 
     // 綁定主列表
     const mainList = document.getElementById('foodList');
-    sortableInstances.push(new Sortable(mainList, sortableOptions));
+    if(mainList) sortableInstances.push(new Sortable(mainList, sortableOptions));
 
     // 綁定所有子資料夾列表
     document.querySelectorAll('.folder-content-list').forEach(fl => {
@@ -188,7 +189,7 @@ function createFolderEl(folder) {
     return li;
 }
 
-// ================= 資料操作邏輯 (遞迴) =================
+// ================= 資料夾與食物的 CRUD 操作 (遞迴) =================
 function addFood() {
     const input = document.getElementById('foodInput');
     const val = input.value.trim();
@@ -248,8 +249,37 @@ function toggleFolder(id) {
     if (folderEl) folderEl.classList.toggle('open');
 }
 
-// ================= 互動遊戲核心邏輯 (Methods) =================
+// ================= 事件綁定 (UI 元件) =================
+// 預算選擇按鈕 (新增時)
+document.querySelectorAll('#addBudgetSelector .budget-btn').forEach(btn => {
+    btn.onclick = function() {
+        document.querySelectorAll('#addBudgetSelector .budget-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        selectedNewBudget = this.dataset.val;
+    };
+});
 
+// 輸入框 Enter 鍵
+document.getElementById('foodInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') addFood();
+});
+
+// 過濾器
+function setFilter(budget) {
+    if(isAnimating) return;
+    currentFilter = budget;
+    
+    document.querySelectorAll('#budgetFilterBar .filter-tab').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.filter === budget) {
+            btn.classList.add('active');
+        }
+    });
+    
+    setupCurrentMethod();
+}
+
+// ================= 互動遊戲核心邏輯 (Methods) =================
 const methods = [
     {
         id: 'slot',
@@ -550,88 +580,7 @@ const methods = [
     }
 ];
 
-// ================= UI 資料與主題綁定 =================
-
-let selectedNewBudget = '$$';
-document.querySelectorAll('#addBudgetSelector .budget-btn').forEach(btn => {
-    btn.onclick = function() {
-        document.querySelectorAll('#addBudgetSelector .budget-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        selectedNewBudget = this.dataset.val;
-    };
-});
-
-// 修正 Bug：使用精準的 dataset.filter 進行比對
-function setFilter(budget) {
-    if(isAnimating) return;
-    currentFilter = budget;
-    
-    document.querySelectorAll('#budgetFilterBar .filter-tab').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.dataset.filter === budget) {
-            btn.classList.add('active');
-        }
-    });
-    
-    setupCurrentMethod();
-}
-
-// 動態修改單個項目的預算並重繪
-function changeBudget(index, newBudget) {
-    if (isAnimating) return;
-    foods[index].budget = newBudget;
-    renderFoods(); 
-}
-
-// 渲染左側食物清單：加入即時修改小按鈕
-function renderFoods() {
-    const list = document.getElementById('foodList');
-    list.innerHTML = '';
-    foods.forEach((food, index) => {
-        const li = document.createElement('li');
-        li.className = 'food-item';
-        
-        // 判斷按鈕的激活狀態
-        const s1 = food.budget === '$' ? 'active' : '';
-        const s2 = food.budget === '$$' ? 'active' : '';
-        const s3 = food.budget === '$$$' ? 'active' : '';
-
-        li.innerHTML = `
-            <span class="food-name">${food.name}</span>
-            <div class="inline-budget-group">
-                <button class="inline-budget-btn ${s1}" onclick="changeBudget(${index}, '$')">$</button>
-                <button class="inline-budget-btn ${s2}" onclick="changeBudget(${index}, '$$')">$$</button>
-                <button class="inline-budget-btn ${s3}" onclick="changeBudget(${index}, '$$$')">$$$</button>
-            </div>
-            <button class="delete-btn" onclick="removeFood(${index})">刪除</button>
-        `;
-        list.appendChild(li);
-    });
-    localStorage.setItem('dinnerFoods', JSON.stringify(foods));
-    setupCurrentMethod(); // 自動刷新目前的遊戲過濾器狀態
-}
-
-function addFood() {
-    const input = document.getElementById('foodInput');
-    const val = input.value.trim();
-    if (val) {
-        foods.push({ name: val, budget: selectedNewBudget });
-        input.value = '';
-        renderFoods();
-    }
-}
-
-function removeFood(index) {
-    if (isAnimating) return;
-    foods.splice(index, 1);
-    renderFoods();
-}
-
-document.getElementById('foodInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') addFood();
-});
-
-// 遊戲方法切換
+// ================= 遊戲方法 UI 控制 =================
 function renderMethods() {
     const bar = document.getElementById('methodsBar');
     bar.innerHTML = '';
@@ -676,43 +625,40 @@ function setupCurrentMethod() {
     };
 }
 
-// ================= 深淺色模式與動態狀態欄 (PWA 優化) =================
+// ================= 深淺色模式切換 (PWA 狀態列優化) =================
 const themeCheckbox = document.getElementById('themeCheckbox');
 const modeText = document.getElementById('modeText');
 const themeColorMeta = document.getElementById('themeColorMeta'); 
-
-// 修改：將操作對象改為 document.documentElement (即 html 標籤)
 const html = document.documentElement; 
 const currentTheme = localStorage.getItem('theme');
 
-// 初始化時判斷深色模式
 if (currentTheme === 'dark') {
     html.classList.add('dark-mode');
     themeCheckbox.checked = true;
     modeText.innerText = 'Dark mode';
-    if (themeColorMeta) themeColorMeta.setAttribute('content', '#1C1C1E'); // 深色狀態欄
+    if (themeColorMeta) themeColorMeta.setAttribute('content', '#1C1C1E'); 
 } else {
-    if (themeColorMeta) themeColorMeta.setAttribute('content', '#F5F5F7'); // 淺色狀態欄
+    if (themeColorMeta) themeColorMeta.setAttribute('content', '#F2F2F7'); 
 }
 
-// 監聽開關切換
 themeCheckbox.addEventListener('change', function() {
     if (this.checked) {
         html.classList.add('dark-mode');
         modeText.innerText = 'Dark mode';
         localStorage.setItem('theme', 'dark');
-        if (themeColorMeta) themeColorMeta.setAttribute('content', '#1C1C1E'); // 切換為深色狀態欄
+        if (themeColorMeta) themeColorMeta.setAttribute('content', '#1C1C1E'); 
     } else {
         html.classList.remove('dark-mode');
         modeText.innerText = 'Light mode';
         localStorage.setItem('theme', 'light');
-        if (themeColorMeta) themeColorMeta.setAttribute('content', '#F5F5F7'); // 切換為淺色狀態欄
+        if (themeColorMeta) themeColorMeta.setAttribute('content', '#F2F2F7'); 
     }
 });
 
+// ================= 程式啟動與 PWA 註冊 =================
 renderFoods();
 renderMethods();
-// ================= PWA Service Worker 註冊 =================
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
