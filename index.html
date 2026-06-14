@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>晚餐吃什麼？(完美動畫與細節版)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <h1 class="page-title">🍽️ 晚餐吃什麼？</h1>
+        <div class="theme-switch-wrapper">
+            <label class="theme-switch" for="themeCheckbox">
+                <input type="checkbox" id="themeCheckbox" />
+                <div class="slider">
+                    <div class="stars-and-hills">
+                        <div class="star star1"></div><div class="star star2"></div>
+                        <div class="star star3"></div><div class="star star4"></div><div class="hill"></div>
+                    </div>
+                    <div class="clouds">
+                        <div class="cloud cloud-main"></div><div class="cloud cloud-small-1"></div><div class="cloud cloud-small-2"></div>
+                    </div>
+                    <div class="thumb">
+                        <div class="crater crater1"></div><div class="crater crater2"></div><div class="crater crater3"></div>
+                    </div>
+                </div>
+            </label>
+            <div class="theme-text" id="modeText">Light mode</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card sidebar">
+            <h2>🍜 晚餐名單</h2>
+            
+            <div class="input-section">
+                <input type="text" id="foodInput" placeholder="輸入想吃的食物...">
+                <div class="budget-selector" id="addBudgetSelector">
+                    <button class="budget-btn" data-val="$">$</button>
+                    <button class="budget-btn active" data-val="$$">$$</button>
+                    <button class="budget-btn" data-val="$$$">$$$</button>
+                </div>
+                <button id="addBtn" class="add-btn" onclick="addFood()">新增</button>
+            </div>
+
+            <ul class="food-list" id="foodList"></ul>
+        </div>
+
+        <div class="card main-panel">
+            <h2>幫我決定吃什麼</h2>
+            
+            <div class="methods-bar" id="methodsBar"></div>
+
+            <div class="budget-filter-bar" id="budgetFilterBar">
+                <button class="filter-tab active" data-filter="all" onclick="setFilter('all')">全部</button>
+                <button class="filter-tab" data-filter="$" onclick="setFilter('$')">$ 平價</button>
+                <button class="filter-tab" data-filter="$$" onclick="setFilter('$$')">$$ 中價位</button>
+                <button class="filter-tab" data-filter="$$$" onclick="setFilter('$$$')">$$$ 奢華</button>
+            </div>
+
+            <div class="interactive-zone" id="interactiveZone"></div>
+            <button id="actionBtn" class="action-btn">點擊開始</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
