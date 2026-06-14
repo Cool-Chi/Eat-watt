@@ -6,21 +6,46 @@
     --shadow-color: rgba(0, 0, 0, 0.06); --item-border: #E5E5EA; --card-face: #FFFFFF; --card-back-pattern: #0071E3;
 }
 
+/* 修改：將 body.dark-mode 改為 html.dark-mode */
+html.dark-mode {
+    --bg-color: #1C1C1E; --card-bg: rgba(44, 44, 46, 0.7); --card-border: rgba(255, 255, 255, 0.1);
+    --text-main: #F5F5F7; --text-secondary: #AEAEB2; --apple-blue: #0A84FF; --apple-blue-hover: #0071E3;
+    --danger: #FF453A; --input-border: #3A3A3C; --input-bg: #2C2C2E;
+    --method-bar-bg: #3A3A3C; --method-tab-active: #48484A;
+    --shadow-color: rgba(0, 0, 0, 0.25); --item-border: #3A3A3C; --card-face: #2C2C2E; --card-back-pattern: #0A84FF;
+}
+
 /* ================= PWA 原生感優化 (防藍框與防選取) ================= */
 * {
-    /* 移除手機端點擊時出現的預設半透明藍色遮罩 */
     -webkit-tap-highlight-color: transparent;
 }
 
-body {
-    /* 禁止使用者長按選取文字或圖片，營造原生 App 體驗 */
-    -webkit-user-select: none;
-    user-select: none;
-    /* 禁止長按彈出系統預設選單 */
-    -webkit-touch-callout: none; 
+/* 修改：擴展背景色到 html 層級，並加入 overscroll-behavior-y: none 防露底色 */
+html, body {
+    background-color: var(--bg-color);
+    overscroll-behavior-y: none;
 }
 
-/* 但必須把「輸入框」的選取功能還給它，否則會無法打字游標 */
+/* 基礎排版 */
+body { 
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro TC", sans-serif; 
+    color: var(--text-main); 
+    margin: 0; 
+    padding: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    min-height: 100vh; 
+    -webkit-font-smoothing: antialiased; 
+    transition: background-color 0.4s, color 0.4s; 
+    overflow-x: hidden; 
+    
+    /* 防選取 */
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
 input[type="text"] {
     -webkit-user-select: auto;
     user-select: auto;
