@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eat_watt 呷啥？幫你選晚餐</title>
-    <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="apple-touch-icon" href="icon-192.png">
-    <meta name="theme-color" id="themeColorMeta" content="#F5F5F7">
+    <meta name="theme-color" id="themeColorMeta" content="#F2F2F7">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 </head>
 <body>
     <div class="header">
@@ -38,16 +41,19 @@
             <h2>🍜 晚餐名單</h2>
             
             <div class="input-section">
-                <input type="text" id="foodInput" placeholder="輸入想吃的食物...">
+                <input type="text" id="foodInput" placeholder="輸入想吃的食物或資料夾名稱...">
                 <div class="budget-selector" id="addBudgetSelector">
                     <button class="budget-btn" data-val="$">$</button>
                     <button class="budget-btn active" data-val="$$">$$</button>
                     <button class="budget-btn" data-val="$$$">$$$</button>
                 </div>
-                <button id="addBtn" class="add-btn" onclick="addFood()">新增</button>
+                <div class="action-buttons">
+                    <button id="addBtn" class="add-btn" onclick="addFood()">+ 新增食物</button>
+                    <button id="addFolderBtn" class="add-folder-btn" onclick="addFolder()">📁 新增資料夾</button>
+                </div>
             </div>
 
-            <ul class="food-list" id="foodList"></ul>
+            <div class="food-list-container" id="foodList"></div>
         </div>
 
         <div class="card main-panel">
