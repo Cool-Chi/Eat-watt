@@ -466,13 +466,15 @@ function setupCurrentMethod() {
 // ================= 深淺色模式與動態狀態欄 (PWA 優化) =================
 const themeCheckbox = document.getElementById('themeCheckbox');
 const modeText = document.getElementById('modeText');
-const themeColorMeta = document.getElementById('themeColorMeta'); // 抓取狀態欄 meta
-const body = document.body;
+const themeColorMeta = document.getElementById('themeColorMeta'); 
+
+// 修改：將操作對象改為 document.documentElement (即 html 標籤)
+const html = document.documentElement; 
 const currentTheme = localStorage.getItem('theme');
 
 // 初始化時判斷深色模式
 if (currentTheme === 'dark') {
-    body.classList.add('dark-mode');
+    html.classList.add('dark-mode');
     themeCheckbox.checked = true;
     modeText.innerText = 'Dark mode';
     if (themeColorMeta) themeColorMeta.setAttribute('content', '#1C1C1E'); // 深色狀態欄
@@ -483,21 +485,17 @@ if (currentTheme === 'dark') {
 // 監聽開關切換
 themeCheckbox.addEventListener('change', function() {
     if (this.checked) {
-        body.classList.add('dark-mode');
+        html.classList.add('dark-mode');
         modeText.innerText = 'Dark mode';
         localStorage.setItem('theme', 'dark');
         if (themeColorMeta) themeColorMeta.setAttribute('content', '#1C1C1E'); // 切換為深色狀態欄
     } else {
-        body.classList.remove('dark-mode');
+        html.classList.remove('dark-mode');
         modeText.innerText = 'Light mode';
         localStorage.setItem('theme', 'light');
         if (themeColorMeta) themeColorMeta.setAttribute('content', '#F5F5F7'); // 切換為淺色狀態欄
     }
 });
-
-// 程式啟動
-renderFoods();
-renderMethods();
 
 // ================= PWA Service Worker 註冊 =================
 if ('serviceWorker' in navigator) {
