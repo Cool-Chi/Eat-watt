@@ -710,6 +710,8 @@ themeCheckbox.addEventListener('change', function() {
     }
 });
 
+renderFoods();
+renderMethods();
 // ================= PWA Service Worker 註冊 =================
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
