@@ -41,9 +41,10 @@
             
             <div class="input-section">
                 <input type="text" id="foodInput" placeholder="輸入想吃的食物...">
-                <div class="budget-selector" id="addBudgetSelector">
+                <div class="budget-selector" id="addBudgetSelector" data-active="$$">
+                    <div class="budget-slider-indicator"></div>
                     <button class="budget-btn" data-val="$">$</button>
-                    <button class="budget-btn active" data-val="$$">$$</button>
+                    <button class="budget-btn" data-val="$$">$$</button>
                     <button class="budget-btn" data-val="$$$">$$$</button>
                 </div>
                 <div class="input-actions">
@@ -65,6 +66,8 @@
                 <button class="filter-tab active" data-filter="$$" onclick="setFilter('$$')">$$ 中價位</button>
                 <button class="filter-tab active" data-filter="$$$" onclick="setFilter('$$$')">$$$ 奢華</button>
             </div>
+
+            <div id="poolPreview" class="pool-preview"></div>
 
             <div class="interactive-zone" id="interactiveZone"></div>
             <button id="actionBtn" class="action-btn">點擊開始</button>
