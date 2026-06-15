@@ -3,7 +3,7 @@
 .food-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; max-height: 50vh; padding-bottom: 20px; }
 .food-list::-webkit-scrollbar { width: 0; } 
 
-.swipe-wrapper { position: relative; margin-bottom: 10px; border-radius: 16px; background: transparent; overflow: hidden;}
+.swipe-wrapper { position: relative; margin-bottom: 10px; border-radius: 16px; background: transparent; overflow: hidden; width: 100%; box-sizing: border-box;}
 .folder-wrapper { border-radius: 20px; margin-bottom: 12px; }
 
 /* 拖曳手柄 */
@@ -16,44 +16,75 @@
 .swipe-left-bg { right: 0; left: 50%; background: var(--danger); justify-content: flex-end; }
 .swipe-right-bg { left: 0; right: 50%; background: #34C759; justify-content: flex-start; }
 
-/* 卡片本體 (加入更柔和的 transition 避免拖曳時閃爍) */
+/* 卡片本體 */
 .swipe-front { 
     position: relative; z-index: 2; background: var(--card-face); border-radius: 16px; 
     box-shadow: 0 2px 10px var(--shadow-color); border: 1px solid rgba(255,255,255,0.05); 
     display: flex; flex-direction: column; 
-    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease; 
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease;
+    width: 100%; box-sizing: border-box;
 }
 .food-item { padding: 12px 16px 12px 6px; display: flex; align-items: center; justify-content: space-between; flex-direction: row;}
 .folder-item { border-radius: 20px; }
 
-.food-item-left { display: flex; align-items: center; gap: 6px; flex: 1; overflow: hidden; }
-.food-name { font-weight: 500; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 4px; }
+/* 強制截斷與 Flexbox 佈局收縮 */
+.food-item-left { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; overflow: hidden; }
+.food-name { font-weight: 500; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 4px; flex: 1; }
+
 .folder-header { padding: 16px 16px 16px 6px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; border-radius: 20px; }
-.folder-title { display: flex; align-items: center; gap: 8px; flex: 1; padding-left: 4px; cursor: pointer;}
+.folder-title { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; padding-left: 4px; cursor: pointer;}
+.folder-title-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
 
 /* 行內編輯樣式 */
 .food-rename-input, .folder-rename-input { font-size: 16px; font-weight: 600; font-family: inherit; color: var(--text-main); background: var(--card-bg); border: 2px solid var(--apple-blue); border-radius: 8px; padding: 4px 8px; outline: none; box-sizing: border-box; }
 .food-rename-input { width: 90%; }
 .folder-rename-input { width: 60%; }
 
-/* 資料夾展開與階層樣式 */
+/* ================== 資料夾展開與階層樣式 (已修復子代選擇器污染) ================== */
 .folder-arrow { transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); font-size: 12px; color: var(--text-secondary); cursor: pointer; padding: 5px; }
-.folder-wrapper.open .folder-arrow { transform: rotate(180deg); }
+
+/* 嚴格使用 > 子選擇器，避免父資料夾展開時，強迫內部的子資料夾也全部被展開 */
+.folder-wrapper.open > .swipe-front > .folder-header .folder-arrow { transform: rotate(180deg); }
 .folder-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
-.folder-wrapper.open .folder-content { grid-template-rows: 1fr; }
+.folder-wrapper.open > .swipe-front > .folder-content { grid-template-rows: 1fr; }
+
 .folder-content-inner { overflow: hidden; }
-.folder-content-list { min-height: 10px; padding: 0 12px 12px 12px; list-style: none; margin: 0; }
 
-/* ================= 拖曳動畫與視覺回饋 (終極實體感) ================= */
+/* === 深層嵌套與優化的 ::before 輔助線 === */
+.folder-content-list { 
+    position: relative;
+    min-height: 10px; 
+    padding: 0 0 0 8px; 
+    margin: 0 0 0 12px; /* 縮小縮進比例 */
+    list-style: none; 
+    box-sizing: border-box;
+}
 
-/* 按住尚未拖曳時：輕微縮放，平滑浮起 */
+/* 使用 ::before 畫線，利用 bottom 設定提前結束，創造呼吸空間 */
+.folder-content-list::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 8px; /* 讓線條在最後一張卡片前完美停止 */
+    left: 0;
+    width: 2px;
+    background: rgba(150, 150, 150, 0.2);
+    border-radius: 2px;
+}
+
+/* 當資料夾內完全沒有卡片時，自動隱藏左側輔助引導線 */
+.folder-content-list:empty::before {
+    display: none;
+}
+
+/* ================= 拖曳動畫與視覺回饋 ================= */
+
 .sortable-chosen > .swipe-front { 
     transform: scale(0.98) !important; 
     box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important; 
     z-index: 100;
 }
 
-/* 正在拖曳的實體：不透明且保持原比例，加入極深陰影表示高度 */
 .sortable-drag { 
     opacity: 1 !important; 
     z-index: 9999 !important; 
@@ -64,7 +95,6 @@
     box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important; 
 }
 
-/* 佔位符：隱藏原本卡片內容，只顯示乾淨虛線框 */
 .sortable-ghost { 
     opacity: 1 !important; 
     border: 2px dashed var(--apple-blue) !important; 

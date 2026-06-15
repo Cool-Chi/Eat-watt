@@ -46,6 +46,8 @@ export function bindSwipe(wrapperEl, frontEl, id, isFolder) {
     let currentTranslate = 0; 
 
     const startHandler = (e) => {
+        e.stopPropagation(); // 阻斷事件冒泡，防止滑動子卡片時母卡片跟著動
+        
         if (state.isDraggingGlobal || state.isAnimating) return;
         if (e.target.closest('.drag-handle') || e.target.closest('.inline-budget-group')) return; 
         
@@ -137,7 +139,8 @@ export function bindSwipe(wrapperEl, frontEl, id, isFolder) {
     });
 }
 
-export function inlineEditItem(id, isFolder) {
+export function inlineEditItem(id, isFolder, e) {
+    if (e) e.stopPropagation(); // 阻斷冒泡
     const wrapper = document.querySelector(`[data-id="${id}"]`);
     if(!wrapper) return;
     
@@ -156,9 +159,9 @@ export function inlineEditItem(id, isFolder) {
     input.value = currentName;
     input.className = isFolder ? 'folder-rename-input' : 'food-rename-input';
     
-    input.onmousedown = (e) => e.stopPropagation();
-    input.ontouchstart = (e) => e.stopPropagation();
-    input.onclick = (e) => e.stopPropagation();
+    input.onmousedown = (ev) => ev.stopPropagation();
+    input.ontouchstart = (ev) => ev.stopPropagation();
+    input.onclick = (ev) => ev.stopPropagation();
     
     titleSpan.replaceWith(input);
     input.focus();
@@ -177,7 +180,7 @@ export function inlineEditItem(id, isFolder) {
     };
     
     input.addEventListener('blur', saveRename);
-    input.addEventListener('keypress', e => { if(e.key === 'Enter') input.blur(); });
+    input.addEventListener('keypress', ev => { if(ev.key === 'Enter') input.blur(); });
 }
 
 // ================= 排序系統 (絕對座標懸停展開 & 全域滾動防失控) =================
@@ -192,7 +195,7 @@ export function initSortable() {
         group: {
             name: 'nested',
             put: (to, from, dragEl) => {
-                if (to.el.classList.contains('folder-content-list') && dragEl.dataset.type === 'folder') return false;
+                if (dragEl.contains(to.el)) return false; 
                 return true;
             }
         },
@@ -208,7 +211,6 @@ export function initSortable() {
         swapThreshold: 0.65,      
         invertSwap: true,         
         
-        // 將滾動範圍嚴格鎖定在指定清單容器內，避免全網頁失控滾動
         scroll: document.querySelector('.food-list'),            
         scrollSensitivity: 60,   
         scrollSpeed: 10,         
@@ -216,13 +218,12 @@ export function initSortable() {
 
         onStart: () => {
             state.isDraggingGlobal = true;
-            document.body.classList.add('is-dragging-mode'); // 鎖定網頁背景
+            document.body.classList.add('is-dragging-mode');
             document.querySelectorAll('.swipe-wrapper').forEach(w => w.classList.remove('is-swiping'));
         },
         onMove: (evt, originalEvent) => {
             if (!originalEvent) return;
             
-            // 使用原生游標的絕對座標來尋找下方元素，解決 related 邊界問題
             const clientX = originalEvent.clientX || (originalEvent.touches && originalEvent.touches.length > 0 ? originalEvent.touches[0].clientX : 0);
             const clientY = originalEvent.clientY || (originalEvent.touches && originalEvent.touches.length > 0 ? originalEvent.touches[0].clientY : 0);
             if (!clientX || !clientY) return;
@@ -255,7 +256,7 @@ export function initSortable() {
         },
         onEnd: () => {
             state.isDraggingGlobal = false;
-            document.body.classList.remove('is-dragging-mode'); // 解除鎖定
+            document.body.classList.remove('is-dragging-mode');
             clearTimeout(hoverTimeout);
             hoveredFolderId = null;
             syncStateFromDOM();
@@ -281,8 +282,9 @@ function syncStateFromDOM() {
                     name: li.dataset.name, budget: li.dataset.budget
                 });
             } else if (li.dataset.type === 'folder') {
-                const subList = li.querySelector('.folder-content-list');
-                const titleSpan = li.querySelector('.folder-title-text'); 
+                // 使用 :scope > 防禦性選擇器，確保只會抓取「目前這一個層級」的 list，不會被深層嵌套的相同 class 干擾
+                const subList = li.querySelector(':scope > .swipe-front > .folder-content > .folder-content-inner > .folder-content-list');
+                const titleSpan = li.querySelector(':scope > .swipe-front > .folder-header .folder-title-text'); 
                 result.push({
                     id: li.dataset.id, type: 'folder',
                     name: titleSpan ? titleSpan.innerText : li.dataset.name,
@@ -314,9 +316,10 @@ export function createFoodEl(food) {
     li.dataset.id = food.id; li.dataset.type = 'food';
     li.dataset.name = food.name; li.dataset.budget = food.budget;
     
+    // 加入 event 參數
     li.innerHTML = `
-        <div class="swipe-bg swipe-right-bg" onclick="inlineEditItem('${food.id}', false)">✏️ 編輯</div>
-        <div class="swipe-bg swipe-left-bg" onclick="handleDelete('${food.id}')">🗑️ 刪除</div>
+        <div class="swipe-bg swipe-right-bg" onclick="inlineEditItem('${food.id}', false, event)">✏️ 編輯</div>
+        <div class="swipe-bg swipe-left-bg" onclick="handleDelete('${food.id}', event)">🗑️ 刪除</div>
         <div class="swipe-front food-item">
             <div class="food-item-left">
                 <div class="drag-handle">☰</div>
@@ -325,9 +328,9 @@ export function createFoodEl(food) {
             <div class="food-item-right">
                 <div class="inline-budget-group" data-active="${food.budget}">
                     <div class="budget-slider-indicator"></div>
-                    <button class="inline-budget-btn" data-val="$" onclick="changeBudget('${food.id}', '$', this)">$</button>
-                    <button class="inline-budget-btn" data-val="$$" onclick="changeBudget('${food.id}', '$$', this)">$$</button>
-                    <button class="inline-budget-btn" data-val="$$$" onclick="changeBudget('${food.id}', '$$$', this)">$$$</button>
+                    <button class="inline-budget-btn" data-val="$" onclick="changeBudget('${food.id}', '$', this, event)">$</button>
+                    <button class="inline-budget-btn" data-val="$$" onclick="changeBudget('${food.id}', '$$', this, event)">$$</button>
+                    <button class="inline-budget-btn" data-val="$$$" onclick="changeBudget('${food.id}', '$$$', this, event)">$$$</button>
                 </div>
             </div>
         </div>
@@ -342,16 +345,17 @@ export function createFolderEl(folder) {
     li.className = `swipe-wrapper folder-wrapper ${folder.isOpen ? 'open' : ''}`;
     li.dataset.id = folder.id; li.dataset.type = 'folder'; li.dataset.name = folder.name;
     
+    // 加入 event 參數
     li.innerHTML = `
-        <div class="swipe-bg swipe-right-bg" onclick="inlineEditItem('${folder.id}', true)">✏️ 編輯</div>
-        <div class="swipe-bg swipe-left-bg" onclick="handleDelete('${folder.id}')">🗑️ 刪除</div>
+        <div class="swipe-bg swipe-right-bg" onclick="inlineEditItem('${folder.id}', true, event)">✏️ 編輯</div>
+        <div class="swipe-bg swipe-left-bg" onclick="handleDelete('${folder.id}', event)">🗑️ 刪除</div>
         <div class="swipe-front folder-item">
             <div class="folder-header">
                 <div class="drag-handle">☰</div>
-                <div class="folder-title" onclick="toggleFolder('${folder.id}')">
+                <div class="folder-title" onclick="toggleFolder('${folder.id}', event)">
                     📁 <span class="folder-title-text">${folder.name}</span> 
                 </div>
-                <span class="folder-arrow" onclick="toggleFolder('${folder.id}')">▼</span>
+                <span class="folder-arrow" onclick="toggleFolder('${folder.id}', event)">▼</span>
             </div>
             <div class="folder-content">
                 <div class="folder-content-inner">
@@ -365,8 +369,10 @@ export function createFolderEl(folder) {
     bindSwipe(li, front, folder.id, true); 
     
     const subList = li.querySelector('.folder-content-list');
+    
     folder.items.forEach(item => {
         if (item.type === 'food') subList.appendChild(createFoodEl(item));
+        else if (item.type === 'folder') subList.appendChild(createFolderEl(item)); 
     });
     return li;
 }
@@ -395,7 +401,8 @@ export function addFolder() {
     saveData(); renderFoods();
 }
 
-export function handleDelete(id) {
+export function handleDelete(id, e) {
+    if (e) e.stopPropagation(); // 阻斷冒泡
     const removeNode = (nodes) => {
         for (let i = 0; i < nodes.length; i++) {
             if (nodes[i].id === id) { nodes.splice(i, 1); return true; }
@@ -406,7 +413,8 @@ export function handleDelete(id) {
     saveData(); renderFoods();
 }
 
-export function changeBudget(id, newBudget, btnEl) {
+export function changeBudget(id, newBudget, btnEl, e) {
+    if (e) e.stopPropagation(); // 阻斷冒泡
     if (state.isDraggingGlobal) return; 
     
     if (btnEl) {
@@ -424,7 +432,8 @@ export function changeBudget(id, newBudget, btnEl) {
     saveData(); setupCurrentMethod(); 
 }
 
-export function toggleFolder(id) {
+export function toggleFolder(id, e) {
+    if (e) e.stopPropagation(); // 阻斷冒泡
     if (state.isAnimating || state.isDraggingGlobal) return; 
     const toggleOpen = (nodes) => {
         for (let i = 0; i < nodes.length; i++) {
