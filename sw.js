@@ -1,4 +1,4 @@
-const CACHE_NAME = 'eat-watt-cache-v2'; // 升級版本號以觸發更新
+const CACHE_NAME = 'eat-watt-cache-v1.1'; // 升級版本號以觸發更新
 
 // 這裡列出你希望離線時也能讀取的所有檔案
 const urlsToCache = [
