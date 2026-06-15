@@ -53,6 +53,8 @@
                     <button class="budget-btn" data-val="$$$">$$$</button>
                 </div>
                 <div class="input-actions">
+                    <button id="importBtn" class="folder-btn" onclick="openImportModal()" title="匯入資料">📥</button>
+                    <button id="exportBtn" class="folder-btn" onclick="openExportModal()" title="匯出資料">📤</button>
                     <button id="addBtn" class="add-btn" onclick="addFood()">新增食物</button>
                     <button id="addFolderBtn" class="folder-btn" onclick="addFolder()" title="新增資料夾">📁</button>
                 </div>
@@ -76,6 +78,15 @@
 
             <div class="interactive-zone" id="interactiveZone"></div>
             <button id="actionBtn" class="action-btn">點擊開始</button>
+        </div>
+    </div>
+
+    <div id="dataModal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <h3 id="modalTitle">匯出/匯入資料</h3>
+            <textarea id="modalTextarea" class="modal-textarea" rows="10"></textarea>
+            <div class="modal-actions" id="modalActions">
+                </div>
         </div>
     </div>
 

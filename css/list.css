@@ -6,19 +6,23 @@
 .swipe-wrapper { position: relative; margin-bottom: 10px; border-radius: 16px; background: transparent; overflow: hidden;}
 .folder-wrapper { border-radius: 20px; margin-bottom: 12px; }
 
-/* 拖曳手柄 (Drag Handle) */
+/* 拖曳手柄 */
 .drag-handle { padding: 0 10px; cursor: grab; color: var(--text-secondary); font-size: 22px; user-select: none; display: flex; align-items: center; justify-content: center; touch-action: none; }
 .drag-handle:active { cursor: grabbing; color: var(--apple-blue); }
 
-/* 底層背景：滑動展開後供使用者點擊 */
+/* 底層背景 */
 .swipe-bg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; padding: 0 20px; font-weight: bold; color: white; border-radius: 16px; z-index: 1; font-size: 15px; opacity: 0; transition: opacity 0.2s; cursor: pointer;}
 .swipe-wrapper.is-swiping .swipe-bg { opacity: 1; }
-/* 左滑露出右側(刪除) / 右滑露出左側(編輯) */
 .swipe-left-bg { right: 0; left: 50%; background: var(--danger); justify-content: flex-end; }
 .swipe-right-bg { left: 0; right: 50%; background: #34C759; justify-content: flex-start; }
 
-/* 卡片本體 */
-.swipe-front { position: relative; z-index: 2; background: var(--card-face); border-radius: 16px; box-shadow: 0 2px 10px var(--shadow-color); border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+/* 卡片本體 (加入更柔和的 transition 避免拖曳時閃爍) */
+.swipe-front { 
+    position: relative; z-index: 2; background: var(--card-face); border-radius: 16px; 
+    box-shadow: 0 2px 10px var(--shadow-color); border: 1px solid rgba(255,255,255,0.05); 
+    display: flex; flex-direction: column; 
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease; 
+}
 .food-item { padding: 12px 16px 12px 6px; display: flex; align-items: center; justify-content: space-between; flex-direction: row;}
 .folder-item { border-radius: 20px; }
 
@@ -40,8 +44,40 @@
 .folder-content-inner { overflow: hidden; }
 .folder-content-list { min-height: 10px; padding: 0 12px 12px 12px; list-style: none; margin: 0; }
 
-/* 拖曳動畫與視覺回饋 (SortableJS Class) */
-.sortable-chosen > .swipe-front { transform: scale(0.96) !important; box-shadow: 0 15px 30px rgba(0,0,0,0.2) !important; z-index: 100;}
-.sortable-drag { opacity: 0.9 !important; cursor: grabbing !important; }
-.sortable-ghost { opacity: 0.3 !important; border: 2px dashed var(--apple-blue) !important; background: transparent !important; }
-.sortable-ghost .swipe-front { background: transparent !important; box-shadow: none !important; border: none !important; }
+/* ================= 拖曳動畫與視覺回饋 (終極實體感) ================= */
+
+/* 按住尚未拖曳時：輕微縮放，平滑浮起 */
+.sortable-chosen > .swipe-front { 
+    transform: scale(0.98) !important; 
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important; 
+    z-index: 100;
+}
+
+/* 正在拖曳的實體：不透明且保持原比例，加入極深陰影表示高度 */
+.sortable-drag { 
+    opacity: 1 !important; 
+    z-index: 9999 !important; 
+    cursor: grabbing !important; 
+}
+.sortable-drag .swipe-front { 
+    transform: scale(1.02) !important; 
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important; 
+}
+
+/* 佔位符：隱藏原本卡片內容，只顯示乾淨虛線框 */
+.sortable-ghost { 
+    opacity: 1 !important; 
+    border: 2px dashed var(--apple-blue) !important; 
+    background: transparent !important; 
+    border-radius: 16px !important; 
+}
+.folder-wrapper.sortable-ghost { 
+    border-radius: 20px !important; 
+}
+.sortable-ghost .swipe-front { 
+    opacity: 0 !important; 
+    visibility: hidden !important; 
+}
+.sortable-ghost .swipe-bg { 
+    display: none !important; 
+}

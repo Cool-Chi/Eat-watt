@@ -2,10 +2,11 @@
 import { state } from './store.js';
 import { 
     addFood, addFolder, handleDelete, changeBudget, toggleFolder, 
-    setFilter, inlineEditItem, renderFoods, renderMethods, updateMethodIndicator 
+    setFilter, inlineEditItem, renderFoods, renderMethods, updateMethodIndicator,
+    openExportModal, openImportModal, closeModal, handleImport, copyExportData, downloadExportData
 } from './ui.js';
 
-// 將需要被 HTML 標籤（如 onclick="..."）直接呼叫的函式，掛載到全域 window 上
+// 將需要被 HTML 行內觸發的函式，掛載到全域 window 上
 window.addFood = addFood;
 window.addFolder = addFolder;
 window.handleDelete = handleDelete;
@@ -13,6 +14,13 @@ window.changeBudget = changeBudget;
 window.toggleFolder = toggleFolder;
 window.setFilter = setFilter;
 window.inlineEditItem = inlineEditItem;
+// 匯入/匯出 Modal 相關
+window.openExportModal = openExportModal;
+window.openImportModal = openImportModal;
+window.closeModal = closeModal;
+window.handleImport = handleImport;
+window.copyExportData = copyExportData;
+window.downloadExportData = downloadExportData;
 
 // ================= 事件綁定 =================
 document.querySelectorAll('#addBudgetSelector .budget-btn').forEach(btn => {

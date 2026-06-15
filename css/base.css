@@ -63,7 +63,12 @@ body {
     -webkit-touch-callout: none;
 }
 
-/* 輸入框必須加回選取功能才能打字 */
+/* 全域鎖死拖曳時的背景網頁滾動 */
+body.is-dragging-mode {
+    overflow: hidden !important;
+    touch-action: none !important;
+}
+
 input[type="text"] { 
     -webkit-user-select: auto; 
     user-select: auto; 
