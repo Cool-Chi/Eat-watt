@@ -1,12 +1,13 @@
-// ================= 全局狀態與樹狀結構 =================
-let currentFilters = ['$', '$$', '$$$']; 
+// ================= 全局狀態與陣列多選過濾 =================
+let activeBudgets = ['$', '$$', '$$$']; // 預設全選
 let listData = []; 
 let currentMethodIndex = 0;
 let isAnimating = false;
 let sortableInstances = []; 
 let selectedNewBudget = '$$';
-let isDraggingGlobal = false; // 拖曳排他鎖：防止拖曳時觸發滑動
+let isDraggingGlobal = false; // 拖曳排他鎖
 
+// 資料載入
 const savedTree = localStorage.getItem('dinnerFoodsTree');
 if (savedTree) {
     listData = JSON.parse(savedTree);
@@ -42,20 +43,24 @@ function setUIState(disabled) {
 function setFilter(budget) {
     if(isAnimating) return;
     
-    if (currentFilters.includes(budget)) {
-        if (currentFilters.length > 1) { // 防呆：至少保留一個條件
-            currentFilters = currentFilters.filter(b => b !== budget); 
-        }
+    // Toggle 切換邏輯
+    const idx = activeBudgets.indexOf(budget);
+    if (idx > -1) {
+        activeBudgets.splice(idx, 1);
     } else {
-        currentFilters.push(budget);
+        activeBudgets.push(budget);
     }
     
+    // 更新過濾器 UI
     document.querySelectorAll('#budgetFilterBar .filter-tab').forEach(btn => {
-        if (currentFilters.includes(btn.dataset.filter)) btn.classList.add('active');
-        else btn.classList.remove('active');
+        if (activeBudgets.includes(btn.dataset.filter)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
     });
     
-    setupCurrentMethod(); // 即時預覽更新
+    setupCurrentMethod(); // 強制即時刷新遊戲區
 }
 
 function getFilteredFoods() {
@@ -67,16 +72,19 @@ function getFilteredFoods() {
         });
     };
     extractFoods(listData);
-    return allFoods.filter(f => currentFilters.includes(f.budget));
+    return allFoods.filter(f => activeBudgets.includes(f.budget));
 }
 
-// ================= 滑鼠與觸控共用滑動手勢 (Swipe) =================
+// ================= 滑鼠與觸控共用手勢引擎 (Swipe) =================
 function bindSwipe(wrapperEl, frontEl, id, isFolder) {
     let startX = 0, startY = 0, currentX = 0;
     let isSwiping = false, isVertical = false, isMouseDown = false;
 
     const startHandler = (e) => {
         if (isDraggingGlobal || isAnimating) return;
+        // 如果使用者點到 .drag-handle 拖曳手柄，則不觸發滑動，保留給 SortableJS
+        if (e.target.closest('.drag-handle')) return; 
+        
         if (e.touches && e.touches.length > 1) return;
         if (e.type === 'mousedown') isMouseDown = true;
         
@@ -100,10 +108,10 @@ function bindSwipe(wrapperEl, frontEl, id, isFolder) {
         const dy = clientY - startY;
 
         if (!isSwiping) {
-            // 判定滑動方向閾值 (大於10px才算)
+            // 判定大於 10px 才算正式滑動
             if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
                 isSwiping = true;
-                wrapperEl.classList.add('is-swiping'); // 加上 class 顯示底層顏色 (防破圖)
+                wrapperEl.classList.add('is-swiping'); // 顯示防破圖底層
                 if (e.cancelable) e.preventDefault(); 
             } else if (Math.abs(dy) > 10) {
                 isVertical = true;
@@ -129,34 +137,32 @@ function bindSwipe(wrapperEl, frontEl, id, isFolder) {
         frontEl.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
         
         if (currentX < -60) {
-            frontEl.style.transform = `translateX(-120%)`; // 刪除
+            frontEl.style.transform = `translateX(-120%)`; // 執行刪除
             setTimeout(() => handleDelete(id), 300);
         } else if (currentX > 60) {
-            frontEl.style.transform = `translateX(120%)`; // 編輯
+            frontEl.style.transform = `translateX(120%)`; // 執行編輯 (food 與 folder 皆可)
             setTimeout(() => {
                 frontEl.style.transform = `translateX(0)`;
                 wrapperEl.classList.remove('is-swiping');
                 inlineEditItem(id, isFolder);
             }, 300);
         } else {
-            frontEl.style.transform = `translateX(0)`; // 回彈
+            frontEl.style.transform = `translateX(0)`; // 距離不足，回彈
             wrapperEl.classList.remove('is-swiping');
         }
         
-        // 防點擊誤觸
         setTimeout(() => { isSwiping = false; }, 50);
     };
 
-    // 觸控
+    // 觸控事件
     frontEl.addEventListener('touchstart', startHandler, {passive: true});
     frontEl.addEventListener('touchmove', moveHandler, {passive: false});
     frontEl.addEventListener('touchend', endHandler);
-
-    // 滑鼠
+    // 滑鼠事件
     frontEl.addEventListener('mousedown', startHandler);
     frontEl.addEventListener('mousemove', moveHandler, {passive: false});
     frontEl.addEventListener('mouseup', endHandler);
-    frontEl.addEventListener('mouseleave', endHandler); // 滑鼠移出範圍強制判定結束
+    frontEl.addEventListener('mouseleave', endHandler);
 }
 
 // 行內編輯 (通用於 Food 與 Folder)
@@ -172,7 +178,7 @@ function inlineEditItem(id, isFolder) {
     input.value = currentName;
     input.className = isFolder ? 'folder-rename-input' : 'food-rename-input';
     
-    // 防止編輯時觸發滑動與拖曳
+    // 防止編輯時誤觸拖曳與滑動
     input.onmousedown = (e) => e.stopPropagation();
     input.ontouchstart = (e) => e.stopPropagation();
     input.onclick = (e) => e.stopPropagation();
@@ -191,15 +197,14 @@ function inlineEditItem(id, isFolder) {
         };
         updateName(listData);
         saveData();
-        renderFoods(); // 儲存後重繪
+        renderFoods();
     };
     
     input.addEventListener('blur', saveRename);
     input.addEventListener('keypress', e => { if(e.key === 'Enter') input.blur(); });
 }
 
-
-// ================= SortableJS 拖曳排序 =================
+// ================= SortableJS 拖曳排序 (自動滾動與專屬手柄) =================
 function initSortable() {
     sortableInstances.forEach(s => s.destroy());
     sortableInstances = [];
@@ -212,15 +217,17 @@ function initSortable() {
                 return true;
             }
         },
+        handle: '.drag-handle', // 核心解法：僅限抓取手柄拖曳
         animation: 300, 
         easing: "cubic-bezier(0.25, 1, 0.5, 1)", 
         fallbackOnBody: true,
-        delay: 200, 
-        delayOnTouchOnly: true, 
+        scroll: true,            // 開啟邊緣自動滾動
+        scrollSensitivity: 60,   
+        scrollSpeed: 10,         
         ghostClass: 'sortable-ghost',
         dragClass: 'sortable-drag',
         onStart: () => {
-            isDraggingGlobal = true; // 鎖死滑動
+            isDraggingGlobal = true;
             document.querySelectorAll('.swipe-wrapper').forEach(w => w.classList.remove('is-swiping'));
         },
         onEnd: () => {
@@ -292,6 +299,7 @@ function createFoodEl(food) {
         <div class="swipe-bg swipe-left-bg">🗑️ 刪除</div>
         <div class="swipe-front food-item">
             <div class="food-item-left">
+                <div class="drag-handle">☰</div>
                 <span class="food-name">${food.name}</span>
             </div>
             <div class="food-item-right">
@@ -317,11 +325,12 @@ function createFolderEl(folder) {
         <div class="swipe-bg swipe-right-bg">✏️ 編輯</div>
         <div class="swipe-bg swipe-left-bg">🗑️ 刪除</div>
         <div class="swipe-front folder-item">
-            <div class="folder-header" onclick="toggleFolder('${folder.id}')">
-                <div class="folder-title">
+            <div class="folder-header">
+                <div class="drag-handle">☰</div>
+                <div class="folder-title" onclick="toggleFolder('${folder.id}')">
                     📁 <span class="folder-title-text">${folder.name}</span> 
                 </div>
-                <span class="folder-arrow">▼</span>
+                <span class="folder-arrow" onclick="toggleFolder('${folder.id}')">▼</span>
             </div>
             <div class="folder-content">
                 <div class="folder-content-inner">
@@ -351,7 +360,7 @@ function addFood() {
     }
 }
 
-// 新資料夾直接建立在頂部，自動命名為「菜單 1」
+// 在頂部新增自動遞增命名資料夾
 function addFolder() {
     let maxCount = 0;
     listData.forEach(item => {
@@ -588,7 +597,30 @@ const methods = [
     }
 ];
 
-// ================= 遊戲方法 UI 控制 =================
+// ================= 精準滑動膠囊指示器 (JS 計算防破版) =================
+function updateMethodIndicator() {
+    const bar = document.getElementById('methodsBar');
+    if (!bar) return;
+    let indicator = document.getElementById('methodIndicator');
+    if(!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'methodIndicator';
+        indicator.className = 'slider-indicator';
+        bar.appendChild(indicator);
+    }
+    const activeTab = bar.querySelector('.method-tab.active');
+    if(activeTab) {
+        indicator.style.width = `${activeTab.offsetWidth}px`;
+        indicator.style.height = `${activeTab.offsetHeight}px`;
+        indicator.style.transform = `translate(${activeTab.offsetLeft}px, ${activeTab.offsetTop}px)`;
+    }
+}
+
+// 監聽視窗大小改變，避免換行時指示器走位
+window.addEventListener('resize', () => {
+    requestAnimationFrame(updateMethodIndicator);
+});
+
 function renderMethods() {
     const bar = document.getElementById('methodsBar');
     bar.innerHTML = '';
@@ -599,6 +631,9 @@ function renderMethods() {
         btn.onclick = () => { if(!isAnimating) switchMethod(index); };
         bar.appendChild(btn);
     });
+    
+    // 等待 DOM 繪製完畢後再計算位置
+    requestAnimationFrame(updateMethodIndicator);
     setupCurrentMethod();
 }
 
@@ -609,13 +644,20 @@ function switchMethod(index) {
         if(i === index) tab.classList.add('active');
         else tab.classList.remove('active');
     });
+    updateMethodIndicator();
     setupCurrentMethod();
 }
 
 function setupCurrentMethod() {
-    const method = methods[currentMethodIndex];
     const zone = document.getElementById('interactiveZone');
     const actionBtn = document.getElementById('actionBtn');
+    
+    if (activeBudgets.length === 0) {
+        zone.innerHTML = `<div class="empty-state">請至少選擇一種預算以進行抽籤！</div>`;
+        actionBtn.innerText = '尚未選擇預算'; actionBtn.disabled = true; actionBtn.onclick = null;
+        return;
+    }
+    
     const pool = getFilteredFoods();
 
     if (pool.length === 0) {
@@ -624,6 +666,7 @@ function setupCurrentMethod() {
         return;
     }
 
+    const method = methods[currentMethodIndex];
     actionBtn.disabled = false;
     method.setupUI(zone, pool);
     actionBtn.innerText = `開始 ${method.name.split(' ')[1]}`;
