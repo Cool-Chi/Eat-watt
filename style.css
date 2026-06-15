@@ -46,7 +46,7 @@ body {
 }
 input[type="text"] { -webkit-user-select: auto; user-select: auto; }
 
-/* 標題與深淺開關 */
+/* 標題與開關 */
 .header { width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .page-title { font-size: 28px; font-weight: 700; margin: 0; }
 .theme-switch-wrapper { display: flex; flex-direction: column; align-items: center; }
@@ -72,57 +72,56 @@ input:checked + .slider .clouds { transform: translateY(30px); opacity: 0; }
 input:checked + .slider .stars-and-hills { opacity: 1; transform: translateY(0); }
 .theme-text { margin-top: 8px; font-size: 15px; font-weight: 500; }
 
-/* 容器與 iOS 大圓角毛玻璃卡片 */
+/* 容器與卡片 */
 .container { display: flex; gap: 24px; max-width: 950px; width: 100%; align-items: flex-start; }
 .card { background: var(--card-bg); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border-radius: 24px; padding: 30px; box-shadow: 0 8px 32px var(--shadow-color); border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s; }
 .sidebar { flex: 1; display: flex; flex-direction: column; min-width: 320px; }
 .main-panel { flex: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
 
-/* 輸入與按鈕區 */
+/* 輸入區 */
 h2 { font-size: 20px; font-weight: 600; margin-top: 0; margin-bottom: 20px; color: var(--text-main); }
 .input-section { display: flex; flex-direction: column; gap: 12px; margin-bottom: 10px; }
 input[type="text"] { width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-main); font-size: 16px; outline: none; box-sizing: border-box; transition: all 0.3s ease; }
 input[type="text"]:focus { background: var(--card-bg); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.3); }
 .input-actions { display: flex; gap: 8px; width: 100%; }
-.add-btn { flex: 4; background: var(--apple-blue); color: white; border: none; border-radius: 14px; padding: 12px 0; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;}
-.folder-btn { flex: 1; background: var(--input-bg); color: var(--text-main); border: none; border-radius: 14px; font-size: 20px; cursor: pointer; transition: all 0.3s ease;}
 
-/* ================= 排序與 Telegram 滑動 UI ================= */
+/* 全域按鈕基礎互動 */
+button { transition: background-color 0.3s cubic-bezier(0.25, 1, 0.5, 1), color 0.3s, box-shadow 0.3s, transform 0.2s; }
+button:active:not(:disabled) { transform: scale(0.96); box-shadow: inset 0 3px 6px rgba(0,0,0,0.15); }
+
+.add-btn { flex: 4; background: var(--apple-blue); color: white; border: none; border-radius: 14px; padding: 12px 0; font-size: 16px; font-weight: 600; cursor: pointer; }
+.folder-btn { flex: 1; background: var(--input-bg); color: var(--text-main); border: none; border-radius: 14px; font-size: 20px; cursor: pointer;}
+.add-btn:hover:not(:disabled) { background: var(--apple-blue-hover); }
+
+/* ================= 排序、滑動與編輯 UI (防破圖處理) ================= */
 .food-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; max-height: 50vh; padding-bottom: 20px; }
 .food-list::-webkit-scrollbar { width: 0; } 
 
-/* 拖曳外層包裹器 (防漏色) */
 .swipe-wrapper { position: relative; margin-bottom: 10px; border-radius: 16px; background: transparent; overflow: hidden; cursor: grab; }
 .folder-wrapper { border-radius: 20px; margin-bottom: 12px; }
 
-/* 底層顏色 (Telegram 風格) */
-.swipe-bg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; padding: 0 20px; font-weight: bold; color: white; border-radius: 16px; z-index: 1; font-size: 15px; }
+/* 底層顏色：預設隱藏 (Opacity: 0)，僅在觸發 is-swiping 時顯示，避免拖曳破圖 */
+.swipe-bg { position: absolute; top: 0; bottom: 0; display: flex; align-items: center; padding: 0 20px; font-weight: bold; color: white; border-radius: 16px; z-index: 1; font-size: 15px; opacity: 0; transition: opacity 0.2s; }
+.swipe-wrapper.is-swiping .swipe-bg { opacity: 1; }
 .swipe-left-bg { right: 0; left: 50%; background: var(--danger); justify-content: flex-end; }
 .swipe-right-bg { left: 0; right: 50%; background: #34C759; justify-content: flex-start; }
 
-/* 卡片本體 */
-.swipe-front { 
-    position: relative; z-index: 2; background: var(--card-face); border-radius: 16px; 
-    box-shadow: 0 2px 10px var(--shadow-color); border: 1px solid rgba(255,255,255,0.05); 
-    display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-}
+/* 卡片本體 (增加文字內距 padding-left) */
+.swipe-front { position: relative; z-index: 2; background: var(--card-face); border-radius: 16px; box-shadow: 0 2px 10px var(--shadow-color); border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
 .food-item { padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; flex-direction: row;}
 .folder-item { border-radius: 20px; }
 
-/* 內部排版 (文字內縮 16px) */
 .food-item-left { display: flex; align-items: center; gap: 10px; flex: 1; overflow: hidden; }
-.food-name { font-weight: 500; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 16px; }
+.food-name { font-weight: 500; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 12px; }
 .folder-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; cursor: pointer; border-radius: 20px; }
-.folder-title { display: flex; align-items: center; gap: 8px; flex: 1; padding-left: 16px; }
+.folder-title { display: flex; align-items: center; gap: 8px; flex: 1; padding-left: 12px; }
 
-/* Inline Edit Input */
-.folder-rename-input { 
-    font-size: 16px; font-weight: 600; font-family: inherit; color: var(--text-main); 
-    background: var(--card-bg); border: 2px solid var(--apple-blue); border-radius: 8px; 
-    padding: 4px 8px; width: 60%; outline: none; margin-left: 8px;
-}
+/* 編輯輸入框樣式 */
+.food-rename-input, .folder-rename-input { font-size: 16px; font-weight: 600; font-family: inherit; color: var(--text-main); background: var(--card-bg); border: 2px solid var(--apple-blue); border-radius: 8px; padding: 4px 8px; outline: none; margin-left: 4px; box-sizing: border-box;}
+.food-rename-input { width: 100%; }
+.folder-rename-input { width: 60%; }
 
-/* 資料夾展開動畫 */
+/* 資料夾動畫 */
 .folder-arrow { transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); font-size: 12px; color: var(--text-secondary); }
 .folder-wrapper.open .folder-arrow { transform: rotate(180deg); }
 .folder-content { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
@@ -134,33 +133,33 @@ input[type="text"]:focus { background: var(--card-bg); box-shadow: 0 0 0 3px rgb
 .sortable-chosen > .swipe-front { transform: scale(0.96) !important; box-shadow: 0 15px 30px rgba(0,0,0,0.2) !important; z-index: 100;}
 .sortable-drag { opacity: 0.9 !important; cursor: grabbing !important; }
 .sortable-ghost { opacity: 0.3 !important; border: 2px dashed var(--apple-blue) !important; background: transparent !important; }
-.sortable-ghost .swipe-front { background: transparent; box-shadow: none; border: none; }
+.sortable-ghost .swipe-front { background: transparent !important; box-shadow: none !important; border: none !important; }
 
-/* == 全域按鈕過渡 == */
-button { transition: all 0.3s ease; }
-button:active:not(:disabled) { transform: scale(0.96); box-shadow: inset 0 3px 6px rgba(0,0,0,0.15); }
+/* ================= 遊戲區：平滑顏色切換 UI (取代絕對定位指示器) ================= */
+.methods-bar, .budget-selector { display: flex; background: var(--method-bar-bg); padding: 4px; border-radius: 14px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; gap: 2px;}
+.budget-selector { border-radius: 10px; gap: 0;}
 
-/* 預算按鈕清單 UI */
-.budget-selector { display: flex; background: var(--method-bar-bg); padding: 4px; border-radius: 10px; width: 100%; box-sizing: border-box;}
-.budget-btn { flex: 1; background: transparent; color: var(--text-secondary); border: none; padding: 8px 0; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; }
-.budget-btn.active { background: var(--card-bg); color: var(--apple-blue); box-shadow: 0 2px 6px var(--shadow-color); }
+/* 所有切換按鈕共用的平滑動畫 */
+.method-tab, .filter-tab, .budget-btn { 
+    background: transparent; border: none; color: var(--text-secondary); 
+    padding: 8px 16px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: background-color 0.3s cubic-bezier(0.25, 1, 0.5, 1), color 0.3s, box-shadow 0.3s;
+}
+.method-tab.active { background: var(--card-bg); box-shadow: 0 2px 8px var(--shadow-color); color: var(--apple-blue); }
+.budget-btn { padding: 8px 0; border-radius: 8px; font-size: 14px; flex: 1; }
+.budget-btn.active { background: var(--card-bg); box-shadow: 0 2px 6px var(--shadow-color); color: var(--apple-blue); }
 
+.budget-filter-bar { display: flex; background: var(--input-bg); border: 1px solid rgba(255,255,255,0.05); padding: 4px; border-radius: 10px; margin-bottom: 20px; gap: 4px;}
+.filter-tab { padding: 6px 12px; border-radius: 8px; font-size: 13px; }
+.filter-tab.active { background: var(--method-bar-bg); color: var(--text-main); box-shadow: 0 1px 4px var(--shadow-color); }
+
+/* 卡片內聯按鈕 */
 .inline-budget-group { display: flex; background: var(--method-bar-bg); padding: 3px; border-radius: 8px; margin-right: 12px; gap: 2px;}
-.inline-budget-btn { background: transparent; color: var(--text-secondary); border: none; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;}
+.inline-budget-btn { background: transparent; color: var(--text-secondary); border: none; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background-color 0.3s, color 0.3s, box-shadow 0.3s; }
 .inline-budget-btn.active { background: var(--apple-blue); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.inline-budget-btn:hover:not(.active) { background: rgba(0,0,0,0.05); }
 
-/* == iOS Sliding Pill 動畫選單 == */
-.methods-bar { position: relative; display: flex; background: var(--method-bar-bg); padding: 4px; border-radius: 14px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; z-index: 1;}
-.method-tab { position: relative; z-index: 2; background: transparent !important; color: var(--text-main); border:none; padding: 8px 16px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: none !important; transition: color 0.3s ease;}
-.method-tab.active { color: var(--apple-blue); }
-.method-indicator { position: absolute; top: 4px; left: 0; height: calc(100% - 8px); background: var(--card-bg); box-shadow: 0 2px 8px var(--shadow-color); border-radius: 10px; z-index: 1; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: none; }
-
-/* == 多選預算過濾列 == */
-.budget-filter-bar { display: flex; background: var(--input-bg); border: 1px solid var(--input-border); padding: 4px; border-radius: 10px; margin-bottom: 20px; gap: 4px;}
-.filter-tab { background: transparent; border: none; color: var(--text-secondary); padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
-.filter-tab.active { background: var(--method-bar-bg); color: var(--text-main); box-shadow: 0 1px 4px var(--shadow-color);}
-
-/* == 開始按鈕光澤波紋特效 == */
+/* 開始按鈕特效 */
 .interactive-zone { min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; margin-bottom: 10px; position: relative; }
 .action-btn { position: relative; overflow: hidden; background: var(--apple-blue); color: white; border: none; width: 220px; margin-top: 20px; padding: 15px; font-size: 18px; border-radius: 14px; font-weight: 600; cursor: pointer; }
 .action-btn::after { content: ''; position: absolute; top: -50%; left: -60%; width: 20%; height: 200%; background: rgba(255,255,255,0.3); transform: rotate(30deg); transition: 0.6s ease-in-out; }
