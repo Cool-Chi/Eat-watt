@@ -1,0 +1,54 @@
+[
+  {
+    "id": "folder-root-1",
+    "type": "folder",
+    "name": "🔥 極限測試：無限嵌套資料夾",
+    "isOpen": true,
+    "items": [
+      {
+        "id": "folder-sub-1",
+        "type": "folder",
+        "name": "第二層：深層資料夾測試",
+        "isOpen": true,
+        "items": [
+          {
+            "id": "folder-sub-2",
+            "type": "folder",
+            "name": "第三層：超深嵌套測試",
+            "isOpen": true,
+            "items": [
+              { "id": "food-deep-1", "type": "food", "name": "這是一個名字超級無敵長長長長長長長長長長長長長長長長長的食物", "budget": "$$$" },
+              { "id": "food-deep-2", "type": "food", "name": "🥗 嵌套層中的沙拉", "budget": "$" }
+            ]
+          }
+        ]
+      },
+      { "id": "food-1", "type": "food", "name": "🍜 普通拉麵", "budget": "$$" }
+    ]
+  },
+  {
+    "id": "folder-root-2",
+    "type": "folder",
+    "name": "🍱 各類美食大集合",
+    "isOpen": false,
+    "items": [
+      { "id": "food-2", "type": "food", "name": "🍣 鮭魚握壽司", "budget": "$$$" },
+      { "id": "food-3", "type": "food", "name": "🍔 經典美式漢堡", "budget": "$$" },
+      { "id": "food-4", "type": "food", "name": "🍕 夏威夷披薩", "budget": "$$" },
+      { "id": "food-5", "type": "food", "name": "🥟 手工水餃", "budget": "$" },
+      { "id": "food-6", "type": "food", "name": "🌮 墨西哥捲餅", "budget": "$$" }
+    ]
+  },
+  { "id": "food-7", "type": "food", "name": "🍛 咖哩豬排飯", "budget": "$$" },
+  { "id": "food-8", "type": "food", "name": "🍦 超級豪華聖代甜點", "budget": "$$$" },
+  { "id": "food-9", "type": "food", "name": "🍱 便宜又大碗的超值便當", "budget": "$" },
+  { "id": "food-10", "type": "food", "name": "🥩 頂級菲力牛排", "budget": "$$$" },
+  { "id": "food-11", "type": "food", "name": "🍝 義大利肉醬麵", "budget": "$$" },
+  { "id": "food-12", "type": "food", "name": "🍢 宵夜必吃鹹酥雞", "budget": "$" },
+  { "id": "food-13", "type": "food", "name": "🥘 韓式泡菜鍋", "budget": "$$" },
+  { "id": "food-14", "type": "food", "name": "🍰 精緻下午茶蛋糕", "budget": "$$$" },
+  { "id": "food-15", "type": "food", "name": "🥣 清淡稀飯", "budget": "$" },
+  { "id": "food-16", "type": "food", "name": "☕ 精品手沖咖啡", "budget": "$$$" },
+  { "id": "food-17", "type": "food", "name": "🥪 輕食三明治", "budget": "$" },
+  { "id": "food-18", "type": "food", "name": "🍤 日式天婦羅", "budget": "$$" }
+]
