@@ -35,7 +35,7 @@ function saveData() { localStorage.setItem('dinnerFoodsTree', JSON.stringify(lis
 
 function setUIState(disabled) {
     isAnimating = disabled;
-    document.querySelectorAll('#actionBtn, #foodInput, #addBtn, #addFolderBtn, .method-tab, .filter-tab, .budget-btn, .inline-budget-btn')
+    document.querySelectorAll('#actionBtn, #foodInput, #addBtn, #addFolderBtn, .method-tab, .filter-tab, .budget-btn')
         .forEach(btn => btn.disabled = disabled);
 }
 
@@ -72,14 +72,16 @@ function getFilteredFoods() {
     return allFoods.filter(f => activeBudgets.includes(f.budget));
 }
 
-// ================= 滑鼠與觸控共用手勢引擎 =================
+// ================= 滑動手勢 (Swipe Reveal + Click) =================
 function bindSwipe(wrapperEl, frontEl, id, isFolder) {
     let startX = 0, startY = 0, currentX = 0;
     let isSwiping = false, isVertical = false, isMouseDown = false;
+    let currentTranslate = 0; // 記錄卡片目前是開啟還是關閉 (0, 80, -80)
 
     const startHandler = (e) => {
         if (isDraggingGlobal || isAnimating) return;
         if (e.target.closest('.drag-handle')) return; 
+        if (e.target.closest('.inline-budget-group')) return; 
         
         if (e.touches && e.touches.length > 1) return;
         if (e.type === 'mousedown') isMouseDown = true;
@@ -90,7 +92,6 @@ function bindSwipe(wrapperEl, frontEl, id, isFolder) {
         isSwiping = false;
         isVertical = false;
         frontEl.style.transition = 'none';
-        wrapperEl.classList.remove('is-swiping');
     };
 
     const moveHandler = (e) => {
@@ -117,34 +118,47 @@ function bindSwipe(wrapperEl, frontEl, id, isFolder) {
         if (isSwiping) {
             if (e.cancelable) e.preventDefault(); 
             let moveX = dx;
-            if (moveX > 80) moveX = 80 + (moveX - 80) * 0.2;
-            if (moveX < -80) moveX = -80 + (moveX + 80) * 0.2;
-            currentX = moveX;
+            let totalMove = currentTranslate + moveX;
+
+            if (totalMove > 100) totalMove = 100 + (totalMove - 100) * 0.2;
+            if (totalMove < -100) totalMove = -100 + (totalMove + 100) * 0.2;
+            
+            currentX = totalMove;
             frontEl.style.transform = `translateX(${currentX}px)`;
         }
     };
 
     const endHandler = (e) => {
         isMouseDown = false;
-        if (!isSwiping) return;
+        
+        if (!isSwiping) {
+            // 如果卡片目前是展開狀態，使用者點擊卡片本體則將其收合
+            if (currentTranslate !== 0) {
+                e.preventDefault();
+                e.stopPropagation();
+                currentTranslate = 0;
+                frontEl.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+                frontEl.style.transform = `translateX(0)`;
+                setTimeout(() => wrapperEl.classList.remove('is-swiping'), 300);
+            }
+            return;
+        }
         
         frontEl.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
         
-        if (currentX < -60) {
-            frontEl.style.transform = `translateX(-120%)`; 
-            setTimeout(() => handleDelete(id), 300);
-        } else if (currentX > 60) {
-            frontEl.style.transform = `translateX(120%)`; 
-            setTimeout(() => {
-                frontEl.style.transform = `translateX(0)`;
-                wrapperEl.classList.remove('is-swiping');
-                inlineEditItem(id, isFolder);
-            }, 300);
+        // 滑動超過距離則將卡片停留在展開狀態 (露出背景按鈕)
+        if (currentX < -40) {
+            currentTranslate = -80; 
+        } else if (currentX > 40) {
+            currentTranslate = 80; 
         } else {
-            frontEl.style.transform = `translateX(0)`; 
-            wrapperEl.classList.remove('is-swiping');
+            currentTranslate = 0; 
         }
         
+        frontEl.style.transform = `translateX(${currentTranslate}px)`;
+        if (currentTranslate === 0) {
+            setTimeout(() => wrapperEl.classList.remove('is-swiping'), 300);
+        }
         setTimeout(() => { isSwiping = false; }, 50);
     };
 
@@ -155,12 +169,31 @@ function bindSwipe(wrapperEl, frontEl, id, isFolder) {
     frontEl.addEventListener('mousemove', moveHandler, {passive: false});
     frontEl.addEventListener('mouseup', endHandler);
     frontEl.addEventListener('mouseleave', endHandler);
+    
+    // 點擊卡片本體時的額外收合判定
+    frontEl.addEventListener('click', (e) => {
+        if (currentTranslate !== 0) {
+            e.preventDefault(); e.stopPropagation();
+            currentTranslate = 0;
+            frontEl.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+            frontEl.style.transform = `translateX(0)`;
+            setTimeout(() => wrapperEl.classList.remove('is-swiping'), 300);
+        }
+    });
 }
 
 // 行內編輯
-function inlineEditItem(id, isFolder) {
+window.inlineEditItem = function(id, isFolder) {
+    // 點擊編輯後先自動收合卡片
     const wrapper = document.querySelector(`[data-id="${id}"]`);
-    if(!wrapper) return;
+    if(wrapper) {
+        const frontEl = wrapper.querySelector('.swipe-front');
+        if (frontEl) {
+            frontEl.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
+            frontEl.style.transform = `translateX(0)`;
+        }
+        wrapper.classList.remove('is-swiping');
+    }
     
     const titleSpan = isFolder ? wrapper.querySelector('.folder-title-text') : wrapper.querySelector('.food-name');
     const currentName = titleSpan.innerText;
@@ -193,7 +226,7 @@ function inlineEditItem(id, isFolder) {
     
     input.addEventListener('blur', saveRename);
     input.addEventListener('keypress', e => { if(e.key === 'Enter') input.blur(); });
-}
+};
 
 // ================= SortableJS 拖曳排序 =================
 function initSortable() {
@@ -282,8 +315,8 @@ function createFoodEl(food) {
     li.dataset.name = food.name; li.dataset.budget = food.budget;
     
     li.innerHTML = `
-        <div class="swipe-bg swipe-right-bg">✏️ 編輯</div>
-        <div class="swipe-bg swipe-left-bg">🗑️ 刪除</div>
+        <div class="swipe-bg swipe-right-bg" onclick="inlineEditItem('${food.id}', false)">✏️ 編輯</div>
+        <div class="swipe-bg swipe-left-bg" onclick="handleDelete('${food.id}')">🗑️ 刪除</div>
         <div class="swipe-front food-item">
             <div class="food-item-left">
                 <div class="drag-handle">☰</div>
@@ -310,8 +343,8 @@ function createFolderEl(folder) {
     li.dataset.id = folder.id; li.dataset.type = 'folder'; li.dataset.name = folder.name;
     
     li.innerHTML = `
-        <div class="swipe-bg swipe-right-bg">✏️ 編輯</div>
-        <div class="swipe-bg swipe-left-bg">🗑️ 刪除</div>
+        <div class="swipe-bg swipe-right-bg" onclick="inlineEditItem('${folder.id}', true)">✏️ 編輯</div>
+        <div class="swipe-bg swipe-left-bg" onclick="handleDelete('${folder.id}')">🗑️ 刪除</div>
         <div class="swipe-front folder-item">
             <div class="folder-header">
                 <div class="drag-handle">☰</div>
@@ -361,23 +394,21 @@ function addFolder() {
     saveData(); renderFoods();
 }
 
-function handleDelete(id) {
-    if (isAnimating) return;
+// 移除 isAnimating 阻擋，確保任何時候點擊刪除都生效
+window.handleDelete = function(id) {
     const removeNode = (nodes) => {
         for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].id === id) { nodes[i].splice(i, 1); return true; }
+            if (nodes[i].id === id) { nodes.splice(i, 1); return true; }
             if (nodes[i].type === 'folder' && removeNode(nodes[i].items)) return true;
         }
     };
     removeNode(listData);
     saveData(); renderFoods();
-}
+};
 
-// 修改變更預算邏輯，透過 CSS 觸發純滑動動畫
 function changeBudget(id, newBudget, btnEl) {
-    if (isAnimating || isDraggingGlobal) return;
+    if (isDraggingGlobal) return; 
     
-    // 即時透過屬性改變觸發 CSS 動畫
     if (btnEl) {
         const group = btnEl.closest('.inline-budget-group');
         if (group) group.setAttribute('data-active', newBudget);
@@ -391,7 +422,7 @@ function changeBudget(id, newBudget, btnEl) {
     };
     updateBudget(listData);
     saveData(); 
-    setupCurrentMethod(); // 僅更新即時預覽，不重新渲染清單以保留 CSS 滑動動畫
+    setupCurrentMethod(); // 僅更新即時預覽，不整頁重新渲染以保留 CSS 滑動動畫
 }
 
 function toggleFolder(id) {
@@ -417,7 +448,6 @@ document.querySelectorAll('#addBudgetSelector .budget-btn').forEach(btn => {
     };
 });
 document.getElementById('foodInput').addEventListener('keypress', e => { if (e.key === 'Enter') addFood(); });
-
 
 // ================= 互動遊戲核心邏輯 (Methods) =================
 const methods = [
@@ -652,8 +682,9 @@ function setupCurrentMethod() {
         return;
     }
 
-    const names = pool.map(f => f.name).join('、');
-    preview.innerHTML = `🎯 抽籤名單：${names}`;
+    // 將抽籤名單渲染為精緻的 Badge 標籤
+    const badgesHtml = pool.map(f => `<span class="preview-badge">${f.name}</span>`).join('');
+    preview.innerHTML = badgesHtml;
 
     const method = methods[currentMethodIndex];
     actionBtn.disabled = false;
