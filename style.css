@@ -133,7 +133,7 @@ button:active:not(:disabled) { transform: scale(0.96); box-shadow: inset 0 3px 6
 .folder-content-inner { overflow: hidden; }
 .folder-content-list { min-height: 10px; padding: 0 12px 12px 12px; list-style: none; margin: 0; }
 
-/* 拖曳動畫與視覺回饋 (SortableJS Class) */
+/* 拖曳動畫與視覺回饋 */
 .sortable-chosen > .swipe-front { transform: scale(0.96) !important; box-shadow: 0 15px 30px rgba(0,0,0,0.2) !important; z-index: 100;}
 .sortable-drag { opacity: 0.9 !important; cursor: grabbing !important; }
 .sortable-ghost { opacity: 0.3 !important; border: 2px dashed var(--apple-blue) !important; background: transparent !important; }
@@ -141,25 +141,36 @@ button:active:not(:disabled) { transform: scale(0.96); box-shadow: inset 0 3px 6
 
 /* ================= 遊戲區與過濾器 UI ================= */
 .methods-bar { position: relative; display: flex; background: var(--method-bar-bg); padding: 4px; border-radius: 14px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; gap: 2px; z-index: 1;}
-.budget-selector { display: flex; background: var(--method-bar-bg); padding: 4px; border-radius: 10px; width: 100%; box-sizing: border-box;}
-
-/* 精準的滑動指示器 (Slider Indicator) */
 .slider-indicator { position: absolute; top: 0; left: 0; background: var(--method-tab-active); box-shadow: 0 2px 8px var(--shadow-color); border-radius: 10px; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), width 0.3s cubic-bezier(0.25, 1, 0.5, 1), height 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: 0; pointer-events: none; }
 
 .method-tab { position: relative; z-index: 2; background: transparent !important; color: var(--text-main); border:none; padding: 8px 16px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: none !important; transition: color 0.3s ease; }
 .method-tab.active { color: var(--apple-blue); }
 
-.budget-btn { flex: 1; background: transparent; color: var(--text-secondary); border: none; padding: 8px 0; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;}
-.budget-btn.active { background: var(--card-bg); box-shadow: 0 2px 6px var(--shadow-color); color: var(--apple-blue); }
+/* == 純 CSS 滑動預算按鈕動畫 == */
+.budget-selector, .inline-budget-group { position: relative; z-index: 1; display: flex; background: var(--method-bar-bg); padding: 4px; border-radius: 10px; width: 100%; box-sizing: border-box; gap: 0;}
+.inline-budget-group { padding: 3px; border-radius: 8px; margin-right: 12px; width: 110px; }
 
-.budget-filter-bar { display: flex; background: var(--input-bg); border: 1px solid rgba(255,255,255,0.05); padding: 4px; border-radius: 10px; margin-bottom: 20px; gap: 4px;}
+.budget-slider-indicator { position: absolute; background: var(--apple-blue); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); z-index: -1; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+#addBudgetSelector .budget-slider-indicator { top: 4px; left: 4px; height: calc(100% - 8px); width: calc((100% - 8px) / 3); border-radius: 8px; }
+.inline-budget-group .budget-slider-indicator { top: 3px; left: 3px; height: calc(100% - 6px); width: calc((100% - 6px) / 3); border-radius: 6px; }
+
+/* 資料連動 CSS 變形 */
+[data-active="$"] .budget-slider-indicator { transform: translateX(0%); }
+[data-active="$$"] .budget-slider-indicator { transform: translateX(100%); }
+[data-active="$$$"] .budget-slider-indicator { transform: translateX(200%); }
+
+.budget-btn { flex: 1; position: relative; z-index: 2; background: transparent; color: var(--text-secondary); border: none; padding: 8px 0; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: color 0.3s; }
+.inline-budget-btn { flex: 1; position: relative; z-index: 2; background: transparent; color: var(--text-secondary); border: none; padding: 4px 0; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: color 0.3s; }
+
+/* 顏色切換 */
+[data-active="$"] [data-val="$"], [data-active="$$"] [data-val="$$"], [data-active="$$$"] [data-val="$$$"] { color: white; }
+
+.budget-filter-bar { display: flex; background: var(--input-bg); border: 1px solid rgba(255,255,255,0.05); padding: 4px; border-radius: 10px; margin-bottom: 10px; gap: 4px;}
 .filter-tab { background: transparent; border: none; color: var(--text-secondary); padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background-color 0.3s, color 0.3s, box-shadow 0.3s; }
 .filter-tab.active { background: var(--method-bar-bg); color: var(--text-main); box-shadow: 0 1px 4px var(--shadow-color); }
 
-.inline-budget-group { display: flex; background: var(--method-bar-bg); padding: 3px; border-radius: 8px; margin-right: 12px; gap: 2px;}
-.inline-budget-btn { background: transparent; color: var(--text-secondary); border: none; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background-color 0.3s, color 0.3s, box-shadow 0.3s; }
-.inline-budget-btn.active { background: var(--apple-blue); color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.inline-budget-btn:hover:not(.active) { background: rgba(0,0,0,0.05); }
+/* 即時預覽名單 */
+.pool-preview { width: 100%; font-size: 14px; color: var(--text-secondary); text-align: center; margin-bottom: 15px; line-height: 1.4; min-height: 20px; word-break: break-all; padding: 0 10px; box-sizing: border-box;}
 
 /* 開始按鈕 */
 .interactive-zone { min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; margin-bottom: 10px; position: relative; }
