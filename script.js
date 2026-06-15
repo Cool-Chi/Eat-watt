@@ -1,11 +1,11 @@
 // ================= 全局狀態與陣列多選過濾 =================
-let activeBudgets = ['$', '$$', '$$$']; // 預設全選
+let activeBudgets = ['$', '$$', '$$$']; 
 let listData = []; 
 let currentMethodIndex = 0;
 let isAnimating = false;
 let sortableInstances = []; 
 let selectedNewBudget = '$$';
-let isDraggingGlobal = false; // 拖曳排他鎖
+let isDraggingGlobal = false; 
 
 // 資料載入
 const savedTree = localStorage.getItem('dinnerFoodsTree');
@@ -43,24 +43,21 @@ function setUIState(disabled) {
 function setFilter(budget) {
     if(isAnimating) return;
     
-    // Toggle 切換邏輯
     const idx = activeBudgets.indexOf(budget);
     if (idx > -1) {
-        activeBudgets.splice(idx, 1);
+        if (activeBudgets.length > 1) { 
+            activeBudgets.splice(idx, 1);
+        }
     } else {
         activeBudgets.push(budget);
     }
     
-    // 更新過濾器 UI
     document.querySelectorAll('#budgetFilterBar .filter-tab').forEach(btn => {
-        if (activeBudgets.includes(btn.dataset.filter)) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
+        if (activeBudgets.includes(btn.dataset.filter)) btn.classList.add('active');
+        else btn.classList.remove('active');
     });
     
-    setupCurrentMethod(); // 強制即時刷新遊戲區
+    setupCurrentMethod(); 
 }
 
 function getFilteredFoods() {
@@ -75,14 +72,13 @@ function getFilteredFoods() {
     return allFoods.filter(f => activeBudgets.includes(f.budget));
 }
 
-// ================= 滑鼠與觸控共用手勢引擎 (Swipe) =================
+// ================= 滑鼠與觸控共用手勢引擎 =================
 function bindSwipe(wrapperEl, frontEl, id, isFolder) {
     let startX = 0, startY = 0, currentX = 0;
     let isSwiping = false, isVertical = false, isMouseDown = false;
 
     const startHandler = (e) => {
         if (isDraggingGlobal || isAnimating) return;
-        // 如果使用者點到 .drag-handle 拖曳手柄，則不觸發滑動，保留給 SortableJS
         if (e.target.closest('.drag-handle')) return; 
         
         if (e.touches && e.touches.length > 1) return;
@@ -108,10 +104,9 @@ function bindSwipe(wrapperEl, frontEl, id, isFolder) {
         const dy = clientY - startY;
 
         if (!isSwiping) {
-            // 判定大於 10px 才算正式滑動
             if (Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)) {
                 isSwiping = true;
-                wrapperEl.classList.add('is-swiping'); // 顯示防破圖底層
+                wrapperEl.classList.add('is-swiping'); 
                 if (e.cancelable) e.preventDefault(); 
             } else if (Math.abs(dy) > 10) {
                 isVertical = true;
@@ -122,7 +117,6 @@ function bindSwipe(wrapperEl, frontEl, id, isFolder) {
         if (isSwiping) {
             if (e.cancelable) e.preventDefault(); 
             let moveX = dx;
-            // 物理阻力
             if (moveX > 80) moveX = 80 + (moveX - 80) * 0.2;
             if (moveX < -80) moveX = -80 + (moveX + 80) * 0.2;
             currentX = moveX;
@@ -137,35 +131,33 @@ function bindSwipe(wrapperEl, frontEl, id, isFolder) {
         frontEl.style.transition = 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)';
         
         if (currentX < -60) {
-            frontEl.style.transform = `translateX(-120%)`; // 執行刪除
+            frontEl.style.transform = `translateX(-120%)`; 
             setTimeout(() => handleDelete(id), 300);
         } else if (currentX > 60) {
-            frontEl.style.transform = `translateX(120%)`; // 執行編輯 (food 與 folder 皆可)
+            frontEl.style.transform = `translateX(120%)`; 
             setTimeout(() => {
                 frontEl.style.transform = `translateX(0)`;
                 wrapperEl.classList.remove('is-swiping');
                 inlineEditItem(id, isFolder);
             }, 300);
         } else {
-            frontEl.style.transform = `translateX(0)`; // 距離不足，回彈
+            frontEl.style.transform = `translateX(0)`; 
             wrapperEl.classList.remove('is-swiping');
         }
         
         setTimeout(() => { isSwiping = false; }, 50);
     };
 
-    // 觸控事件
     frontEl.addEventListener('touchstart', startHandler, {passive: true});
     frontEl.addEventListener('touchmove', moveHandler, {passive: false});
     frontEl.addEventListener('touchend', endHandler);
-    // 滑鼠事件
     frontEl.addEventListener('mousedown', startHandler);
     frontEl.addEventListener('mousemove', moveHandler, {passive: false});
     frontEl.addEventListener('mouseup', endHandler);
     frontEl.addEventListener('mouseleave', endHandler);
 }
 
-// 行內編輯 (通用於 Food 與 Folder)
+// 行內編輯
 function inlineEditItem(id, isFolder) {
     const wrapper = document.querySelector(`[data-id="${id}"]`);
     if(!wrapper) return;
@@ -178,7 +170,6 @@ function inlineEditItem(id, isFolder) {
     input.value = currentName;
     input.className = isFolder ? 'folder-rename-input' : 'food-rename-input';
     
-    // 防止編輯時誤觸拖曳與滑動
     input.onmousedown = (e) => e.stopPropagation();
     input.ontouchstart = (e) => e.stopPropagation();
     input.onclick = (e) => e.stopPropagation();
@@ -204,7 +195,7 @@ function inlineEditItem(id, isFolder) {
     input.addEventListener('keypress', e => { if(e.key === 'Enter') input.blur(); });
 }
 
-// ================= SortableJS 拖曳排序 (自動滾動與專屬手柄) =================
+// ================= SortableJS 拖曳排序 =================
 function initSortable() {
     sortableInstances.forEach(s => s.destroy());
     sortableInstances = [];
@@ -217,11 +208,11 @@ function initSortable() {
                 return true;
             }
         },
-        handle: '.drag-handle', // 核心解法：僅限抓取手柄拖曳
+        handle: '.drag-handle', 
         animation: 300, 
         easing: "cubic-bezier(0.25, 1, 0.5, 1)", 
         fallbackOnBody: true,
-        scroll: true,            // 開啟邊緣自動滾動
+        scroll: true,            
         scrollSensitivity: 60,   
         scrollSpeed: 10,         
         ghostClass: 'sortable-ghost',
@@ -272,7 +263,7 @@ function syncStateFromDOM() {
     setupCurrentMethod(); 
 }
 
-// ================= UI 渲染與資料夾操作 =================
+// ================= UI 渲染與操作 =================
 function renderFoods() {
     const list = document.getElementById('foodList');
     list.innerHTML = '';
@@ -290,10 +281,6 @@ function createFoodEl(food) {
     li.dataset.id = food.id; li.dataset.type = 'food';
     li.dataset.name = food.name; li.dataset.budget = food.budget;
     
-    const s1 = food.budget === '$' ? 'active' : '';
-    const s2 = food.budget === '$$' ? 'active' : '';
-    const s3 = food.budget === '$$$' ? 'active' : '';
-
     li.innerHTML = `
         <div class="swipe-bg swipe-right-bg">✏️ 編輯</div>
         <div class="swipe-bg swipe-left-bg">🗑️ 刪除</div>
@@ -303,10 +290,11 @@ function createFoodEl(food) {
                 <span class="food-name">${food.name}</span>
             </div>
             <div class="food-item-right">
-                <div class="inline-budget-group">
-                    <button class="inline-budget-btn ${s1}" onclick="changeBudget('${food.id}', '$')">$</button>
-                    <button class="inline-budget-btn ${s2}" onclick="changeBudget('${food.id}', '$$')">$$</button>
-                    <button class="inline-budget-btn ${s3}" onclick="changeBudget('${food.id}', '$$$')">$$$</button>
+                <div class="inline-budget-group" data-active="${food.budget}">
+                    <div class="budget-slider-indicator"></div>
+                    <button class="inline-budget-btn" data-val="$" onclick="changeBudget('${food.id}', '$', this)">$</button>
+                    <button class="inline-budget-btn" data-val="$$" onclick="changeBudget('${food.id}', '$$', this)">$$</button>
+                    <button class="inline-budget-btn" data-val="$$$" onclick="changeBudget('${food.id}', '$$$', this)">$$$</button>
                 </div>
             </div>
         </div>
@@ -360,7 +348,6 @@ function addFood() {
     }
 }
 
-// 在頂部新增自動遞增命名資料夾
 function addFolder() {
     let maxCount = 0;
     listData.forEach(item => {
@@ -378,7 +365,7 @@ function handleDelete(id) {
     if (isAnimating) return;
     const removeNode = (nodes) => {
         for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].id === id) { nodes.splice(i, 1); return true; }
+            if (nodes[i].id === id) { nodes[i].splice(i, 1); return true; }
             if (nodes[i].type === 'folder' && removeNode(nodes[i].items)) return true;
         }
     };
@@ -386,8 +373,16 @@ function handleDelete(id) {
     saveData(); renderFoods();
 }
 
-function changeBudget(id, newBudget) {
+// 修改變更預算邏輯，透過 CSS 觸發純滑動動畫
+function changeBudget(id, newBudget, btnEl) {
     if (isAnimating || isDraggingGlobal) return;
+    
+    // 即時透過屬性改變觸發 CSS 動畫
+    if (btnEl) {
+        const group = btnEl.closest('.inline-budget-group');
+        if (group) group.setAttribute('data-active', newBudget);
+    }
+    
     const updateBudget = (nodes) => {
         for (let i = 0; i < nodes.length; i++) {
             if (nodes[i].id === id) { nodes[i].budget = newBudget; return true; }
@@ -395,7 +390,8 @@ function changeBudget(id, newBudget) {
         }
     };
     updateBudget(listData);
-    saveData(); renderFoods();
+    saveData(); 
+    setupCurrentMethod(); // 僅更新即時預覽，不重新渲染清單以保留 CSS 滑動動畫
 }
 
 function toggleFolder(id) {
@@ -416,9 +412,8 @@ function toggleFolder(id) {
 // ================= 事件綁定 =================
 document.querySelectorAll('#addBudgetSelector .budget-btn').forEach(btn => {
     btn.onclick = function() {
-        document.querySelectorAll('#addBudgetSelector .budget-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
         selectedNewBudget = this.dataset.val;
+        document.getElementById('addBudgetSelector').setAttribute('data-active', selectedNewBudget);
     };
 });
 document.getElementById('foodInput').addEventListener('keypress', e => { if (e.key === 'Enter') addFood(); });
@@ -597,7 +592,7 @@ const methods = [
     }
 ];
 
-// ================= 精準滑動膠囊指示器 (JS 計算防破版) =================
+// ================= 精準滑動膠囊指示器 =================
 function updateMethodIndicator() {
     const bar = document.getElementById('methodsBar');
     if (!bar) return;
@@ -616,10 +611,7 @@ function updateMethodIndicator() {
     }
 }
 
-// 監聽視窗大小改變，避免換行時指示器走位
-window.addEventListener('resize', () => {
-    requestAnimationFrame(updateMethodIndicator);
-});
+window.addEventListener('resize', () => { requestAnimationFrame(updateMethodIndicator); });
 
 function renderMethods() {
     const bar = document.getElementById('methodsBar');
@@ -631,8 +623,6 @@ function renderMethods() {
         btn.onclick = () => { if(!isAnimating) switchMethod(index); };
         bar.appendChild(btn);
     });
-    
-    // 等待 DOM 繪製完畢後再計算位置
     requestAnimationFrame(updateMethodIndicator);
     setupCurrentMethod();
 }
@@ -651,20 +641,19 @@ function switchMethod(index) {
 function setupCurrentMethod() {
     const zone = document.getElementById('interactiveZone');
     const actionBtn = document.getElementById('actionBtn');
-    
-    if (activeBudgets.length === 0) {
-        zone.innerHTML = `<div class="empty-state">請至少選擇一種預算以進行抽籤！</div>`;
-        actionBtn.innerText = '尚未選擇預算'; actionBtn.disabled = true; actionBtn.onclick = null;
-        return;
-    }
+    const preview = document.getElementById('poolPreview');
     
     const pool = getFilteredFoods();
 
     if (pool.length === 0) {
+        preview.innerHTML = '';
         zone.innerHTML = `<div class="empty-state">此預算組合內沒有符合的晚餐，請放寬條件！</div>`;
         actionBtn.innerText = '名單為空'; actionBtn.disabled = true; actionBtn.onclick = null;
         return;
     }
+
+    const names = pool.map(f => f.name).join('、');
+    preview.innerHTML = `🎯 抽籤名單：${names}`;
 
     const method = methods[currentMethodIndex];
     actionBtn.disabled = false;
