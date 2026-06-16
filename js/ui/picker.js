@@ -4,6 +4,7 @@ import { renderFoods } from './render.js';
 
 export const ALLOWED_EMOJIS = ['📁', '🍱', '🍜', '🍔', '🍕', '🥗', '🥩', '🍰', '☕', '🔥', '🌟', '❤️'];
 
+// UPDATE START
 export function initEmojiPicker() {
     if (document.getElementById('emojiPicker')) return;
     const picker = document.createElement('div');
@@ -12,16 +13,24 @@ export function initEmojiPicker() {
     document.body.appendChild(picker);
 
     document.addEventListener('click', (e) => {
-        if (!picker.classList.contains('hidden') && !picker.contains(e.target) && !e.target.closest('.folder-emoji')) {
+        if (!picker.classList.contains('hidden') && !picker.contains(e.target)) {
             picker.classList.add('hidden');
+            picker.dataset.folderId = '';
         }
     });
 }
-initEmojiPicker();
 
 export function openEmojiPicker(folderId, triggerElement, event) {
     event.stopPropagation();
     const picker = document.getElementById('emojiPicker');
+    
+    if (!picker.classList.contains('hidden') && picker.dataset.folderId === folderId) {
+        picker.classList.add('hidden');
+        picker.dataset.folderId = '';
+        return;
+    }
+
+    picker.dataset.folderId = folderId;
     const rect = triggerElement.getBoundingClientRect();
 
     picker.innerHTML = '';
@@ -41,6 +50,7 @@ export function openEmojiPicker(folderId, triggerElement, event) {
             saveData();
             renderFoods();
             picker.classList.add('hidden');
+            picker.dataset.folderId = '';
         };
         picker.appendChild(btn);
     });
@@ -49,3 +59,7 @@ export function openEmojiPicker(folderId, triggerElement, event) {
     picker.style.left = `${rect.left + window.scrollX}px`;
     picker.classList.remove('hidden');
 }
+// UPDATE END
+
+// 強制將函式暴露至全域，供 HTML onclick 呼叫
+window.openEmojiPicker = openEmojiPicker;

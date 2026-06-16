@@ -3,7 +3,8 @@ import { state } from './store.js';
 import { 
     addFood, addFolder, handleDelete, changeBudget, toggleFolder, 
     setFilter, inlineEditItem, renderFoods, renderMethods, updateMethodIndicator,
-    openExportModal, openImportModal, closeModal, handleImport, copyExportData, downloadExportData
+    openExportModal, openImportModal, closeModal, handleImport, copyExportData, downloadExportData,
+    initEmojiPicker
 } from './ui/index.js';
 
 // 將需要被 HTML 行內觸發的函式，掛載到全域 window 上
@@ -14,7 +15,6 @@ window.changeBudget = changeBudget;
 window.toggleFolder = toggleFolder;
 window.setFilter = setFilter;
 window.inlineEditItem = inlineEditItem;
-// 匯入/匯出 Modal 相關
 window.openExportModal = openExportModal;
 window.openImportModal = openImportModal;
 window.closeModal = closeModal;
@@ -61,8 +61,11 @@ themeCheckbox.addEventListener('change', function() {
 });
 
 // ================= 程式啟動與 PWA 註冊 =================
-renderFoods();
-renderMethods();
+document.addEventListener('DOMContentLoaded', () => {
+    initEmojiPicker();
+    renderFoods();
+    renderMethods();
+});
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
