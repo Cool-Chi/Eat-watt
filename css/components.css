@@ -68,7 +68,7 @@ button:active:not(:disabled) { transform: scale(0.96); box-shadow: inset 0 3px 6
 .inline-budget-group[data-active="$"] .inline-budget-btn[data-val="$"], .inline-budget-group[data-active="$$"] .inline-budget-btn[data-val="$$"], .inline-budget-group[data-active="$$$"] .inline-budget-btn[data-val="$$$"] { color: white; }
 
 /* ================= 抽籤名單即時預覽 ================= */
-.pool-preview-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 20px; width: 100%; min-height: 32px;}
+.pool-preview-container { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; width: 100%;}
 .preview-badge { background: var(--card-bg); border: 1px solid var(--apple-blue); color: var(--apple-blue); padding: 6px 14px; border-radius: 20px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 6px var(--shadow-color); animation: popIn 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
 @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
@@ -132,4 +132,86 @@ button:active:not(:disabled) { transform: scale(0.96); box-shadow: inset 0 3px 6
 .emoji-btn:hover {
     transform: scale(1.1);
     background: var(--input-bg);
+}
+
+/* ================= 篩選器擴充與預覽面板 ================= */
+.folder-filter-wrap {
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 8px;
+    width: 100%; 
+    margin-bottom: 16px;
+}
+.folder-wrap-btn {
+    padding: 6px 14px; 
+    border-radius: 20px; 
+    font-size: 0.9rem; 
+    font-weight: 500;
+    background: var(--input-bg); 
+    border: 1px solid var(--item-border);
+    color: var(--text-main); 
+    cursor: pointer; 
+    transition: all 0.2s ease;
+}
+.folder-wrap-btn:hover { background: var(--card-bg); }
+.folder-wrap-btn.active { 
+    background: var(--apple-blue); 
+    color: white; 
+    border-color: var(--apple-blue); 
+}
+
+.preview-collapsible { 
+    width: 100%; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    margin-bottom: 20px; 
+}
+.preview-toggle { 
+    font-size: 14px; 
+    color: var(--text-secondary); 
+    cursor: pointer; 
+    padding: 6px 12px; 
+    font-weight: 600; 
+    user-select: none; 
+    transition: color 0.2s; 
+}
+.preview-toggle:hover { color: var(--text-main); }
+
+/* 動畫外殼：利用 Grid 0fr 技巧達成平滑高度推擠 */
+.pool-preview-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    width: 100%;
+}
+.pool-preview-wrapper.open {
+    grid-template-rows: 1fr;
+}
+
+/* 內層容器：處理溢出隱藏、殘留高度消除與彈出動畫 */
+.inner-preview {
+    overflow: hidden;
+    min-height: 0 !important;      /* 強制消除舊有 32px 最小高度佔位 */
+    margin-bottom: 0 !important;   /* 強制消除舊有 20px 底部邊距佔位 */
+    padding: 0 !important;         /* 收合時確保不殘留任何內距 */
+    
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.pool-preview-wrapper.open .inner-preview {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    padding-top: 12px !important;    /* 展開時才賦予上方空間，交由 Grid Track 平滑過渡 */
+    padding-bottom: 16px !important; /* 展開時才賦予下方空間 */
+}
+
+/* 單獨縮小預覽區內的 Badge 尺寸 */
+.inner-preview .preview-badge {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-width: 1px;
 }

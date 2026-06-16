@@ -3,7 +3,7 @@ import { state, saveData } from '../store.js';
 import { bindSwipe } from './gestures.js';
 import { openEmojiPicker } from './picker.js';
 import { changeBudget, handleDelete, inlineEditItem, toggleFolder } from './actions.js';
-import { setupCurrentMethod } from './core.js';
+import { setupCurrentMethod, renderFolderFilters } from './core.js'; // 引入新的分類過濾器渲染函式
 
 export let hoverTimeout = null;
 export let hoveredFolderId = null;
@@ -118,7 +118,9 @@ export function syncStateFromDOM() {
         return result;
     }
     state.listData = parseList(rootList);
-    saveData(); setupCurrentMethod(); 
+    saveData(); 
+    renderFolderFilters(); // 同步重繪分類膠囊
+    setupCurrentMethod(); 
 }
 
 export function renderFoods() {
@@ -128,7 +130,9 @@ export function renderFoods() {
         if (item.type === 'food') list.appendChild(createFoodEl(item));
         else if (item.type === 'folder') list.appendChild(createFolderEl(item));
     });
-    initSortable(); setupCurrentMethod(); 
+    initSortable(); 
+    renderFolderFilters(); // 同步重繪分類膠囊
+    setupCurrentMethod(); 
 }
 
 export function createFoodEl(food) {

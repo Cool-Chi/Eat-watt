@@ -1,54 +1,113 @@
 [
   {
-    "id": "folder-root-1",
+    "id": "folder-stress-depth-1",
     "type": "folder",
-    "name": "🔥 極限測試：無限嵌套資料夾",
+    "name": "💥 深度巢狀極限測試（第一層）",
+    "emoji": "🔥",
     "isOpen": true,
     "items": [
       {
-        "id": "folder-sub-1",
+        "id": "folder-stress-depth-2",
         "type": "folder",
-        "name": "第二層：深層資料夾測試",
+        "name": "第二層：縱向延伸結構",
+        "emoji": "🍱",
         "isOpen": true,
         "items": [
           {
-            "id": "folder-sub-2",
+            "id": "folder-stress-depth-3",
             "type": "folder",
-            "name": "第三層：超深嵌套測試",
+            "name": "第三層：超深嵌套邊緣",
+            "emoji": "🍜",
             "isOpen": true,
             "items": [
-              { "id": "food-deep-1", "type": "food", "name": "這是一個名字超級無敵長長長長長長長長長長長長長長長長長的食物", "budget": "$$$" },
-              { "id": "food-deep-2", "type": "food", "name": "🥗 嵌套層中的沙拉", "budget": "$" }
+              {
+                "id": "folder-stress-depth-4",
+                "type": "folder",
+                "name": "第四層：防黑洞遞迴判定區",
+                "emoji": "🍔",
+                "isOpen": true,
+                "items": [
+                  {
+                    "id": "folder-stress-depth-5",
+                    "type": "folder",
+                    "name": "第五層：即將到達渲染極限？",
+                    "emoji": "🍕",
+                    "isOpen": true,
+                    "items": [
+                      {
+                        "id": "folder-stress-depth-6",
+                        "type": "folder",
+                        "name": "第六層：核心嵌套底部探測",
+                        "emoji": "🥗",
+                        "isOpen": true,
+                        "items": [
+                          {
+                            "id": "food-extreme-long",
+                            "type": "food",
+                            "name": "超長名稱食物測試：這是一碗名字超級無敵爆炸長用來測試文字截斷與省略號 Ellipsis 是否完美運作的至尊海陸空痛風豪華拉麵大滿貫",
+                            "budget": "$$$"
+                          },
+                          {
+                            "id": "food-deep-budget-min",
+                            "type": "food",
+                            "name": "🪙 深層平價路邊攤點心",
+                            "budget": "$"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
             ]
           }
         ]
-      },
-      { "id": "food-1", "type": "food", "name": "🍜 普通拉麵", "budget": "$$" }
+      }
     ]
   },
   {
-    "id": "folder-root-2",
+    "id": "folder-budget-stress",
     "type": "folder",
-    "name": "🍱 各類美食大集合",
-    "isOpen": false,
+    "name": "💰 多維度預算篩選測試艙",
+    "emoji": "🥩",
+    "isOpen": true,
     "items": [
-      { "id": "food-2", "type": "food", "name": "🍣 鮭魚握壽司", "budget": "$$$" },
-      { "id": "food-3", "type": "food", "name": "🍔 經典美式漢堡", "budget": "$$" },
-      { "id": "food-4", "type": "food", "name": "🍕 夏威夷披薩", "budget": "$$" },
-      { "id": "food-5", "type": "food", "name": "🥟 手工水餃", "budget": "$" },
-      { "id": "food-6", "type": "food", "name": "🌮 墨西哥捲餅", "budget": "$$" }
+      { "id": "food-b1-1", "type": "food", "name": "平價學區便當 A款", "budget": "$" },
+      { "id": "food-b1-2", "type": "food", "name": "巷口銅板價陽春麵", "budget": "$" },
+      { "id": "food-b1-3", "type": "food", "name": "抗通膨自助餐（無主菜）", "budget": "$" },
+      { "id": "food-b2-1", "type": "food", "name": "精緻簡餐小火鍋", "budget": "$$" },
+      { "id": "food-b2-2", "type": "food", "name": "正宗日式豚骨拉麵", "budget": "$$" },
+      { "id": "food-b2-3", "type": "food", "name": "手作美式雙層起司牛堡", "budget": "$$" },
+      { "id": "food-b3-1", "type": "food", "name": "熟成A5和牛頂級饗宴", "budget": "$$$" },
+      { "id": "food-b3-2", "type": "food", "name": "主廚無菜單御用日本料理", "budget": "$$$" },
+      { "id": "food-b3-3", "type": "food", "name": "無殼波士頓龍蝦松露意麵", "budget": "$$$" }
     ]
   },
-  { "id": "food-7", "type": "food", "name": "🍛 咖哩豬排飯", "budget": "$$" },
-  { "id": "food-8", "type": "food", "name": "🍦 超級豪華聖代甜點", "budget": "$$$" },
-  { "id": "food-9", "type": "food", "name": "🍱 便宜又大碗的超值便當", "budget": "$" },
-  { "id": "food-10", "type": "food", "name": "🥩 頂級菲力牛排", "budget": "$$$" },
-  { "id": "food-11", "type": "food", "name": "🍝 義大利肉醬麵", "budget": "$$" },
-  { "id": "food-12", "type": "food", "name": "🍢 宵夜必吃鹹酥雞", "budget": "$" },
-  { "id": "food-13", "type": "food", "name": "🥘 韓式泡菜鍋", "budget": "$$" },
-  { "id": "food-14", "type": "food", "name": "🍰 精緻下午茶蛋糕", "budget": "$$$" },
-  { "id": "food-15", "type": "food", "name": "🥣 清淡稀飯", "budget": "$" },
-  { "id": "food-16", "type": "food", "name": "☕ 精品手沖咖啡", "budget": "$$$" },
-  { "id": "food-17", "type": "food", "name": "🥪 輕食三明治", "budget": "$" },
-  { "id": "food-18", "type": "food", "name": "🍤 日式天婦羅", "budget": "$$" }
+  {
+    "id": "folder-empty-edge-1",
+    "type": "folder",
+    "name": "🕳️ 空資料夾邊緣測試（應自動隱藏輔助線）",
+    "emoji": "📁",
+    "isOpen": false,
+    "items": []
+  },
+  {
+    "id": "folder-nested-empty",
+    "type": "folder",
+    "name": "🌀 巢狀空夾大考驗",
+    "emoji": "🌟",
+    "isOpen": true,
+    "items": [
+      {
+        "id": "folder-nested-empty-sub",
+        "type": "folder",
+        "name": "子代空夾",
+        "emoji": "❤️",
+        "isOpen": true,
+        "items": []
+      }
+    ]
+  },
+  { "id": "food-root-only-1", "type": "food", "name": "無家可歸的根目錄水餃", "budget": "$" },
+  { "id": "food-root-only-2", "type": "food", "name": "星巴克手沖配黃金流沙可頌組", "budget": "$$$" }
 ]

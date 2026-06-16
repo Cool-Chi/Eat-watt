@@ -2,6 +2,8 @@
 
 export const state = {
     activeBudgets: ['$', '$$', '$$$'],
+    activeFolders: [],    // 新增：紀錄選中的頂層資料夾 ID
+    isPreviewOpen: false, // 新增：紀錄預覽名單是否展開
     listData: [],
     currentMethodIndex: 0,
     isAnimating: false,

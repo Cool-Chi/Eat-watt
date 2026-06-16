@@ -5,7 +5,7 @@ import { renderFoods } from './render.js';
 
 export function setUIState(disabled) {
     state.isAnimating = disabled;
-    document.querySelectorAll('#actionBtn, #foodInput, #addBtn, #addFolderBtn, .method-tab, .filter-tab, .budget-btn, .folder-btn')
+    document.querySelectorAll('#actionBtn, #foodInput, #addBtn, #addFolderBtn, .method-tab, .filter-tab, .budget-btn, .folder-btn, .folder-wrap-btn')
         .forEach(btn => btn.disabled = disabled);
 }
 
@@ -27,16 +27,71 @@ export function setFilter(budget) {
     setupCurrentMethod(); 
 }
 
+export function toggleFolderFilter(id) {
+    if (state.isAnimating) return;
+    const idx = state.activeFolders.indexOf(id);
+    if (idx > -1) {
+        state.activeFolders.splice(idx, 1);
+    } else {
+        state.activeFolders.push(id);
+    }
+    renderFolderFilters();
+    setupCurrentMethod();
+}
+
+export function renderFolderFilters() {
+    const bar = document.getElementById('folderFilterBar');
+    if (!bar) return;
+    
+    bar.innerHTML = '';
+    const topFolders = state.listData.filter(item => item.type === 'folder');
+    
+    if (topFolders.length === 0) {
+        bar.style.display = 'none';
+    } else {
+        bar.style.display = 'flex';
+        topFolders.forEach(folder => {
+            const btn = document.createElement('button');
+            btn.className = `folder-wrap-btn ${state.activeFolders.includes(folder.id) ? 'active' : ''}`;
+            btn.innerText = `${folder.emoji || '📁'} ${folder.name}`;
+            btn.onclick = () => toggleFolderFilter(folder.id);
+            bar.appendChild(btn);
+        });
+    }
+}
+
+export function togglePreview() {
+    state.isPreviewOpen = !state.isPreviewOpen;
+    const wrapper = document.getElementById('poolPreviewWrapper');
+    const arrow = document.getElementById('previewArrow');
+    
+    if (state.isPreviewOpen) {
+        wrapper.classList.add('open');
+        if (arrow) arrow.innerText = '▴';
+    } else {
+        wrapper.classList.remove('open');
+        if (arrow) arrow.innerText = '▾';
+    }
+}
+
 export function getFilteredFoods() {
     let allFoods = [];
-    const extractFoods = (nodes) => {
+    const extractFoods = (nodes, topLevelId = null) => {
         nodes.forEach(node => {
-            if (node.type === 'food') allFoods.push(node);
-            else if (node.type === 'folder') extractFoods(node.items);
+            if (node.type === 'food') {
+                const isBudgetMatch = state.activeBudgets.includes(node.budget);
+                const isFolderMatch = state.activeFolders.length === 0 || state.activeFolders.includes(topLevelId);
+                
+                if (isBudgetMatch && isFolderMatch) {
+                    allFoods.push(node);
+                }
+            } else if (node.type === 'folder') {
+                extractFoods(node.items, topLevelId || node.id);
+            }
         });
     };
     extractFoods(state.listData);
-    return allFoods.filter(f => state.activeBudgets.includes(f.budget));
+    return allFoods;
 }
 
 export function updateMethodIndicator() {
@@ -86,11 +141,14 @@ export function setupCurrentMethod() {
     const zone = document.getElementById('interactiveZone');
     const actionBtn = document.getElementById('actionBtn');
     const preview = document.getElementById('poolPreview');
+    const poolCount = document.getElementById('poolCount');
     const pool = getFilteredFoods();
+
+    if (poolCount) poolCount.innerText = pool.length;
 
     if (pool.length === 0) {
         preview.innerHTML = '';
-        zone.innerHTML = `<div class="empty-state">此預算組合內沒有符合的晚餐，請放寬條件！</div>`;
+        zone.innerHTML = `<div class="empty-state">此預算與分類內沒有符合的晚餐，請放寬條件！</div>`;
         actionBtn.innerText = '名單為空'; actionBtn.disabled = true; actionBtn.onclick = null;
         return;
     }

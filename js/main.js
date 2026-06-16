@@ -2,7 +2,7 @@
 import { state } from './store.js';
 import { 
     addFood, addFolder, handleDelete, changeBudget, toggleFolder, 
-    setFilter, inlineEditItem, renderFoods, renderMethods, updateMethodIndicator,
+    setFilter, toggleFolderFilter, togglePreview, inlineEditItem, renderFoods, renderMethods, updateMethodIndicator,
     openExportModal, openImportModal, closeModal, handleImport, copyExportData, downloadExportData,
     initEmojiPicker
 } from './ui/index.js';
@@ -14,6 +14,8 @@ window.handleDelete = handleDelete;
 window.changeBudget = changeBudget;
 window.toggleFolder = toggleFolder;
 window.setFilter = setFilter;
+window.toggleFolderFilter = toggleFolderFilter; // 暴露給 Folder 膠囊使用
+window.togglePreview = togglePreview;           // 暴露給名單展開器使用
 window.inlineEditItem = inlineEditItem;
 window.openExportModal = openExportModal;
 window.openImportModal = openImportModal;

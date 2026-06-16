@@ -74,7 +74,16 @@
                 <button class="filter-tab active" data-filter="$$$" onclick="setFilter('$$$')">$$$ 奢華</button>
             </div>
 
-            <div id="poolPreview" class="pool-preview-container"></div>
+            <div id="folderFilterBar" class="folder-filter-wrap"></div>
+            
+            <div class="preview-collapsible">
+                <div class="preview-toggle" onclick="togglePreview()">
+                    👀 預覽符合名單 (<span id="poolCount">0</span>) <span id="previewArrow">▾</span>
+                </div>
+                <div id="poolPreviewWrapper" class="pool-preview-wrapper">
+                    <div id="poolPreview" class="pool-preview-container inner-preview"></div>
+                </div>
+            </div>
 
             <div class="interactive-zone" id="interactiveZone"></div>
             <button id="actionBtn" class="action-btn">點擊開始</button>
