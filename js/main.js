@@ -4,7 +4,7 @@ import {
     addFood, addFolder, handleDelete, changeBudget, toggleFolder, 
     setFilter, inlineEditItem, renderFoods, renderMethods, updateMethodIndicator,
     openExportModal, openImportModal, closeModal, handleImport, copyExportData, downloadExportData
-} from './ui.js';
+} from './ui/index.js';
 
 // 將需要被 HTML 行內觸發的函式，掛載到全域 window 上
 window.addFood = addFood;
