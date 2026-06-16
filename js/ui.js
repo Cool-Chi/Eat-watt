@@ -2,6 +2,55 @@
 import { state, saveData } from './store.js';
 import { methods } from './games.js';
 
+// ================= 全域 Emoji Picker 初始化 =================
+const ALLOWED_EMOJIS = ['📁', '🍱', '🍜', '🍔', '🍕', '🥗', '🥩', '🍰', '☕', '🔥', '🌟', '❤️'];
+
+function initEmojiPicker() {
+    if (document.getElementById('emojiPicker')) return;
+    const picker = document.createElement('div');
+    picker.id = 'emojiPicker';
+    picker.className = 'emoji-picker hidden';
+    document.body.appendChild(picker);
+
+    document.addEventListener('click', (e) => {
+        if (!picker.classList.contains('hidden') && !picker.contains(e.target) && !e.target.closest('.folder-emoji')) {
+            picker.classList.add('hidden');
+        }
+    });
+}
+initEmojiPicker();
+
+window.openEmojiPicker = function(folderId, triggerElement, event) {
+    event.stopPropagation();
+    const picker = document.getElementById('emojiPicker');
+    const rect = triggerElement.getBoundingClientRect();
+
+    picker.innerHTML = '';
+    ALLOWED_EMOJIS.forEach(emoji => {
+        const btn = document.createElement('button');
+        btn.className = 'emoji-btn';
+        btn.innerText = emoji;
+        btn.onclick = (e) => {
+            e.stopPropagation();
+            const update = (nodes) => {
+                for (let n of nodes) {
+                    if (n.id === folderId) { n.emoji = emoji; return true; }
+                    if (n.type === 'folder' && update(n.items)) return true;
+                }
+            };
+            update(state.listData);
+            saveData();
+            renderFoods();
+            picker.classList.add('hidden');
+        };
+        picker.appendChild(btn);
+    });
+
+    picker.style.top = `${rect.bottom + window.scrollY + 8}px`;
+    picker.style.left = `${rect.left + window.scrollX}px`;
+    picker.classList.remove('hidden');
+};
+
 export function setUIState(disabled) {
     state.isAnimating = disabled;
     document.querySelectorAll('#actionBtn, #foodInput, #addBtn, #addFolderBtn, .method-tab, .filter-tab, .budget-btn, .folder-btn')
@@ -46,7 +95,7 @@ export function bindSwipe(wrapperEl, frontEl, id, isFolder) {
     let currentTranslate = 0; 
 
     const startHandler = (e) => {
-        e.stopPropagation(); // 阻斷事件冒泡，防止滑動子卡片時母卡片跟著動
+        e.stopPropagation(); 
         
         if (state.isDraggingGlobal || state.isAnimating) return;
         if (e.target.closest('.drag-handle') || e.target.closest('.inline-budget-group')) return; 
@@ -140,7 +189,7 @@ export function bindSwipe(wrapperEl, frontEl, id, isFolder) {
 }
 
 export function inlineEditItem(id, isFolder, e) {
-    if (e) e.stopPropagation(); // 阻斷冒泡
+    if (e) e.stopPropagation(); 
     const wrapper = document.querySelector(`[data-id="${id}"]`);
     if(!wrapper) return;
     
@@ -282,12 +331,13 @@ function syncStateFromDOM() {
                     name: li.dataset.name, budget: li.dataset.budget
                 });
             } else if (li.dataset.type === 'folder') {
-                // 使用 :scope > 防禦性選擇器，確保只會抓取「目前這一個層級」的 list，不會被深層嵌套的相同 class 干擾
                 const subList = li.querySelector(':scope > .swipe-front > .folder-content > .folder-content-inner > .folder-content-list');
                 const titleSpan = li.querySelector(':scope > .swipe-front > .folder-header .folder-title-text'); 
+                const emojiSpan = li.querySelector(':scope > .swipe-front > .folder-header .folder-emoji');
                 result.push({
                     id: li.dataset.id, type: 'folder',
                     name: titleSpan ? titleSpan.innerText : li.dataset.name,
+                    emoji: emojiSpan ? emojiSpan.innerText : '📁',
                     isOpen: li.classList.contains('open'),
                     items: subList ? parseList(subList) : []
                 });
@@ -316,7 +366,6 @@ export function createFoodEl(food) {
     li.dataset.id = food.id; li.dataset.type = 'food';
     li.dataset.name = food.name; li.dataset.budget = food.budget;
     
-    // 加入 event 參數
     li.innerHTML = `
         <div class="swipe-bg swipe-right-bg" onclick="inlineEditItem('${food.id}', false, event)">✏️ 編輯</div>
         <div class="swipe-bg swipe-left-bg" onclick="handleDelete('${food.id}', event)">🗑️ 刪除</div>
@@ -345,7 +394,6 @@ export function createFolderEl(folder) {
     li.className = `swipe-wrapper folder-wrapper ${folder.isOpen ? 'open' : ''}`;
     li.dataset.id = folder.id; li.dataset.type = 'folder'; li.dataset.name = folder.name;
     
-    // 加入 event 參數
     li.innerHTML = `
         <div class="swipe-bg swipe-right-bg" onclick="inlineEditItem('${folder.id}', true, event)">✏️ 編輯</div>
         <div class="swipe-bg swipe-left-bg" onclick="handleDelete('${folder.id}', event)">🗑️ 刪除</div>
@@ -353,7 +401,8 @@ export function createFolderEl(folder) {
             <div class="folder-header">
                 <div class="drag-handle">☰</div>
                 <div class="folder-title" onclick="toggleFolder('${folder.id}', event)">
-                    📁 <span class="folder-title-text">${folder.name}</span> 
+                    <span class="folder-emoji" onclick="openEmojiPicker('${folder.id}', this, event)">${folder.emoji || '📁'}</span> 
+                    <span class="folder-title-text">${folder.name}</span> 
                 </div>
                 <span class="folder-arrow" onclick="toggleFolder('${folder.id}', event)">▼</span>
             </div>
@@ -397,12 +446,12 @@ export function addFolder() {
         }
     });
     const newName = `菜單 ${maxCount + 1}`;
-    state.listData.unshift({ id: 'folder-' + Date.now(), type: 'folder', name: newName, isOpen: true, items: [] });
+    state.listData.unshift({ id: 'folder-' + Date.now(), type: 'folder', name: newName, emoji: '📁', isOpen: true, items: [] });
     saveData(); renderFoods();
 }
 
 export function handleDelete(id, e) {
-    if (e) e.stopPropagation(); // 阻斷冒泡
+    if (e) e.stopPropagation(); 
     const removeNode = (nodes) => {
         for (let i = 0; i < nodes.length; i++) {
             if (nodes[i].id === id) { nodes.splice(i, 1); return true; }
@@ -414,7 +463,7 @@ export function handleDelete(id, e) {
 }
 
 export function changeBudget(id, newBudget, btnEl, e) {
-    if (e) e.stopPropagation(); // 阻斷冒泡
+    if (e) e.stopPropagation(); 
     if (state.isDraggingGlobal) return; 
     
     if (btnEl) {
@@ -433,7 +482,7 @@ export function changeBudget(id, newBudget, btnEl, e) {
 }
 
 export function toggleFolder(id, e) {
-    if (e) e.stopPropagation(); // 阻斷冒泡
+    if (e) e.stopPropagation(); 
     if (state.isAnimating || state.isDraggingGlobal) return; 
     const toggleOpen = (nodes) => {
         for (let i = 0; i < nodes.length; i++) {

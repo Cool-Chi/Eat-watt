@@ -93,3 +93,43 @@ button:active:not(:disabled) { transform: scale(0.96); box-shadow: inset 0 3px 6
 .modal-btn { padding: 10px 16px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; }
 .modal-btn.cancel { background: var(--input-bg); color: var(--text-secondary); }
 .modal-btn.confirm { background: var(--apple-blue); color: white; }
+
+/* ================= Emoji Picker ================= */
+.emoji-picker {
+    position: absolute;
+    z-index: 9999;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 12px;
+    opacity: 1;
+    transform: scale(1);
+    transition: all 0.2s ease;
+}
+.emoji-picker.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.9);
+}
+.emoji-btn {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.emoji-btn:hover {
+    transform: scale(1.1);
+    background: var(--input-bg);
+}
