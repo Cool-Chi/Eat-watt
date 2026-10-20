@@ -1,6 +1,8 @@
 // js/ui/gestures.js
 import { state } from '../store.js';
 
+let currentlyOpenItem = null;
+
 export function bindSwipe(wrapperEl, frontEl, id, isFolder) {
     let startX = 0, startY = 0, currentX = 0;
     let isSwiping = false, isVertical = false, isMouseDown = false;
@@ -12,6 +14,18 @@ export function bindSwipe(wrapperEl, frontEl, id, isFolder) {
         if (state.isDraggingGlobal || state.isAnimating) return;
         if (e.target.closest('.drag-handle') || e.target.closest('.inline-budget-group')) return; 
         
+        // Auto-collapse logic
+        if (currentlyOpenItem && currentlyOpenItem.id !== id) {
+            currentlyOpenItem.frontEl.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease';
+            currentlyOpenItem.frontEl.style.transform = `translateX(0)`;
+            let openWrapper = currentlyOpenItem.wrapperEl;
+            setTimeout(() => openWrapper.classList.remove('is-swiping'), 300);
+            if (currentlyOpenItem.resetState) {
+                currentlyOpenItem.resetState();
+            }
+            currentlyOpenItem = null;
+        }
+
         if (e.touches && e.touches.length > 1) return;
         if (e.type === 'mousedown') isMouseDown = true;
         
@@ -77,7 +91,14 @@ export function bindSwipe(wrapperEl, frontEl, id, isFolder) {
         else currentTranslate = 0; 
         
         frontEl.style.transform = `translateX(${currentTranslate}px)`;
-        if (currentTranslate === 0) setTimeout(() => wrapperEl.classList.remove('is-swiping'), 300);
+        if (currentTranslate === 0) {
+            setTimeout(() => wrapperEl.classList.remove('is-swiping'), 300);
+            if (currentlyOpenItem && currentlyOpenItem.id === id) {
+                currentlyOpenItem = null;
+            }
+        } else {
+            currentlyOpenItem = { id, frontEl, wrapperEl, resetState: () => { currentTranslate = 0; } };
+        }
         setTimeout(() => { isSwiping = false; }, 50);
     };
 
@@ -96,6 +117,24 @@ export function bindSwipe(wrapperEl, frontEl, id, isFolder) {
             frontEl.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease';
             frontEl.style.transform = `translateX(0)`;
             setTimeout(() => wrapperEl.classList.remove('is-swiping'), 300);
+            if (currentlyOpenItem && currentlyOpenItem.id === id) {
+                currentlyOpenItem = null;
+            }
         }
     });
+
 }
+
+// Handle clicks outside to close the open swipe menu
+document.addEventListener('click', (e) => {
+    if (currentlyOpenItem && !currentlyOpenItem.wrapperEl.contains(e.target)) {
+        currentlyOpenItem.frontEl.style.transition = 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s ease';
+        currentlyOpenItem.frontEl.style.transform = `translateX(0)`;
+        let openWrapper = currentlyOpenItem.wrapperEl;
+        setTimeout(() => openWrapper.classList.remove('is-swiping'), 300);
+        if (currentlyOpenItem.resetState) {
+            currentlyOpenItem.resetState();
+        }
+        currentlyOpenItem = null;
+    }
+});
