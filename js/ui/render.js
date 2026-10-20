@@ -72,7 +72,7 @@ export function initSortable() {
                         targetFolder.classList.add('open');
                         saveData();
                     }
-                }, 600);
+                }, 1500);
             }
         },
         onEnd: () => {
